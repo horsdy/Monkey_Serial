@@ -1,0 +1,14 @@
+<RCC>
+    <qresource prefix="/image">
+        <file>icon/clear.png</file>
+        <file>icon/font.png</file>
+        <file>icon/language.png</file>
+        <file>icon/play.png</file>
+        <file>icon/stop.png</file>
+        <file>icon/work_log_off.png</file>
+        <file>icon/work_log_on.png</file>
+    </qresource>
+    <qresource prefix="/css">
+        <file>style/black.css</file>
+    </qresource>
+</RCC>

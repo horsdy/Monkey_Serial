@@ -10,11 +10,14 @@
     <height>583</height>
    </rect>
   </property>
+  <property name="font">
+   <font>
+    <family>微软雅黑</family>
+    <pointsize>9</pointsize>
+   </font>
+  </property>
   <property name="windowTitle">
    <string>MainWindow</string>
-  </property>
-  <property name="styleSheet">
-   <string notr="true">font: 9pt &quot;微软雅黑&quot;;</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="mouseTracking">
@@ -258,7 +261,6 @@
      <string>文件</string>
     </property>
     <addaction name="action_Log_start"/>
-    <addaction name="action_Log_stop"/>
     <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -285,15 +287,17 @@
     <bool>false</bool>
    </attribute>
    <addaction name="action_open"/>
-   <addaction name="action_close"/>
    <addaction name="action_Log_start"/>
-   <addaction name="action_Log_stop"/>
    <addaction name="action_font"/>
    <addaction name="action_Language"/>
    <addaction name="action_clear"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Log_start">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/work_log_off.png</normaloff>:/image/icon/work_log_off.png</iconset>
+   </property>
    <property name="text">
     <string>启动Log</string>
    </property>
@@ -319,6 +323,10 @@
    </property>
   </action>
   <action name="action_open">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/play.png</normaloff>:/image/icon/play.png</iconset>
+   </property>
    <property name="text">
     <string>打开连接</string>
    </property>
@@ -329,6 +337,10 @@
    </property>
   </action>
   <action name="action_font">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/font.png</normaloff>:/image/icon/font.png</iconset>
+   </property>
    <property name="text">
     <string>字体</string>
    </property>
@@ -337,17 +349,27 @@
    </property>
   </action>
   <action name="action_clear">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/clear.png</normaloff>:/image/icon/clear.png</iconset>
+   </property>
    <property name="text">
     <string>清除</string>
    </property>
   </action>
   <action name="action_Language">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/language.png</normaloff>:/image/icon/language.png</iconset>
+   </property>
    <property name="text">
     <string>language</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
- <resources/>
+ <resources>
+  <include location="monkey.qrc"/>
+ </resources>
  <connections/>
 </ui>
