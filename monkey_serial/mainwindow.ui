@@ -260,7 +260,7 @@
     <property name="title">
      <string>文件</string>
     </property>
-    <addaction name="action_Log_start"/>
+    <addaction name="action_Log"/>
     <addaction name="action_exit"/>
    </widget>
    <widget class="QMenu" name="menu_2">
@@ -286,25 +286,23 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="action_open"/>
-   <addaction name="action_Log_start"/>
+   <addaction name="action_port"/>
+   <addaction name="action_Log"/>
    <addaction name="action_font"/>
    <addaction name="action_Language"/>
    <addaction name="action_clear"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action_Log_start">
+  <action name="action_Log">
    <property name="icon">
     <iconset resource="monkey.qrc">
      <normaloff>:/image/icon/work_log_off.png</normaloff>:/image/icon/work_log_off.png</iconset>
    </property>
    <property name="text">
-    <string>启动Log</string>
+    <string>未启动日志</string>
    </property>
-  </action>
-  <action name="action_Log_stop">
-   <property name="text">
-    <string>停止Log</string>
+   <property name="toolTip">
+    <string>未启动日志</string>
    </property>
   </action>
   <action name="action_exit">
@@ -322,18 +320,14 @@
     <string>关于</string>
    </property>
   </action>
-  <action name="action_open">
+  <action name="action_port">
    <property name="icon">
     <iconset resource="monkey.qrc">
-     <normaloff>:/image/icon/play.png</normaloff>:/image/icon/play.png</iconset>
+     <normaloff>:/image/icon/play.png</normaloff>
+     <normalon>:/image/icon/stop.png</normalon>:/image/icon/play.png</iconset>
    </property>
    <property name="text">
     <string>打开连接</string>
-   </property>
-  </action>
-  <action name="action_close">
-   <property name="text">
-    <string>关闭连接</string>
    </property>
   </action>
   <action name="action_font">
@@ -364,6 +358,9 @@
    </property>
    <property name="text">
     <string>language</string>
+   </property>
+   <property name="toolTip">
+    <string>语言</string>
    </property>
   </action>
  </widget>
