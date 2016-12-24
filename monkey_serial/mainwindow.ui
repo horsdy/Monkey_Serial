@@ -260,6 +260,7 @@
     <property name="title">
      <string>文件</string>
     </property>
+    <addaction name="action_port"/>
     <addaction name="action_Log"/>
     <addaction name="action_exit"/>
    </widget>
@@ -267,7 +268,6 @@
     <property name="title">
      <string>帮助</string>
     </property>
-    <addaction name="action_support"/>
     <addaction name="action_about"/>
    </widget>
    <addaction name="menu"/>
@@ -296,23 +296,18 @@
   <action name="action_Log">
    <property name="icon">
     <iconset resource="monkey.qrc">
-     <normaloff>:/image/icon/work_log_off.png</normaloff>:/image/icon/work_log_off.png</iconset>
+     <normaloff>:/image/icon/work_log_on.png</normaloff>:/image/icon/work_log_on.png</iconset>
    </property>
    <property name="text">
-    <string>未启动日志</string>
+    <string>启动日志</string>
    </property>
    <property name="toolTip">
-    <string>未启动日志</string>
+    <string>启动日志</string>
    </property>
   </action>
   <action name="action_exit">
    <property name="text">
     <string>退出</string>
-   </property>
-  </action>
-  <action name="action_support">
-   <property name="text">
-    <string>赞助</string>
    </property>
   </action>
   <action name="action_about">
@@ -352,12 +347,8 @@
    </property>
   </action>
   <action name="action_Language">
-   <property name="icon">
-    <iconset resource="monkey.qrc">
-     <normaloff>:/image/icon/language.png</normaloff>:/image/icon/language.png</iconset>
-   </property>
    <property name="text">
-    <string>language</string>
+    <string>Language</string>
    </property>
    <property name="toolTip">
     <string>语言</string>

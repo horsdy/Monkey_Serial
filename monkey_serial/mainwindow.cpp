@@ -36,12 +36,21 @@ void MainWindow::on_action_Log_triggered()
 
     if (this->isLoging)
     {
-        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-        ui->action_Log->setToolTip("正在记录日志...");
+        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
+        ui->action_Log->setToolTip("停止日志");
+
+        //Close File
     }
     else
     {
-        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
-        ui->action_Log->setToolTip("未启动日志");
+        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
+        ui->action_Log->setToolTip("启动日志");
+        //若没有设置log文件路径，则弹窗让用户选择文件夹
+
     }
+}
+
+void MainWindow::on_action_Language_triggered()
+{
+    //弹窗选择语言
 }
