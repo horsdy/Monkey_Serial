@@ -52,5 +52,5 @@ void MainWindow::on_action_Log_triggered()
 
 void MainWindow::on_action_Language_triggered()
 {
-    //弹窗选择语言
+
 }

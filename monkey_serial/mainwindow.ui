@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>781</width>
-    <height>583</height>
+    <width>814</width>
+    <height>587</height>
    </rect>
   </property>
   <property name="font">
@@ -252,7 +252,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>781</width>
+     <width>814</width>
      <height>23</height>
     </rect>
    </property>
@@ -347,11 +347,15 @@
    </property>
   </action>
   <action name="action_Language">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/english.png</normaloff>:/image/icon/english.png</iconset>
+   </property>
    <property name="text">
     <string>Language</string>
    </property>
    <property name="toolTip">
-    <string>语言</string>
+    <string>English</string>
    </property>
   </action>
  </widget>
