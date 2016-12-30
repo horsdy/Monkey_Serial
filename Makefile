@@ -208,6 +208,7 @@ Makefile: monkey_serial/monkey_serial.pro C:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/w
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/qtmaind.prl \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Widgets.prl \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Gui.prl \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5SerialPort.prl \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Core.prl
 	$(QMAKE) -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" -o Makefile monkey_serial\monkey_serial.pro
 C:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/features/spec_pre.prf:
@@ -359,6 +360,7 @@ monkey_serial/monkey_serial.pro:
 C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/qtmaind.prl:
 C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Widgets.prl:
 C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Gui.prl:
+C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5SerialPort.prl:
 C:/Qt/Qt5.7.0/5.7/mingw53_32/lib/Qt5Core.prl:
 qmake: FORCE
 	@$(QMAKE) -spec win32-g++ "CONFIG+=debug" "CONFIG+=qml_debug" -o Makefile monkey_serial\monkey_serial.pro

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>814</width>
-    <height>587</height>
+    <width>891</width>
+    <height>621</height>
    </rect>
   </property>
   <property name="font">
@@ -28,6 +28,12 @@
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="QGroupBox" name="groupBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="title">
          <string>串口设置</string>
         </property>
@@ -54,13 +60,32 @@
           </widget>
          </item>
          <item row="2" column="1">
-          <widget class="QComboBox" name="comboBox_4"/>
+          <widget class="QComboBox" name="comboBox_databit"/>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="comboBox_2"/>
+          <widget class="QComboBox" name="comboBox_port">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>150</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>140</width>
+             <height>16777215</height>
+            </size>
+           </property>
+          </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QComboBox" name="comboBox_3"/>
+          <widget class="QComboBox" name="comboBox_baud"/>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="label_2">
@@ -70,7 +95,7 @@
           </widget>
          </item>
          <item row="3" column="1">
-          <widget class="QComboBox" name="comboBox_5"/>
+          <widget class="QComboBox" name="comboBox_checkbit"/>
          </item>
          <item row="0" column="0">
           <widget class="QLabel" name="label">
@@ -80,7 +105,7 @@
           </widget>
          </item>
          <item row="4" column="1">
-          <widget class="QComboBox" name="comboBox_6"/>
+          <widget class="QComboBox" name="comboBox_stopbit"/>
          </item>
          <item row="5" column="0">
           <widget class="QLabel" name="label_6">
@@ -90,7 +115,7 @@
           </widget>
          </item>
          <item row="5" column="1">
-          <widget class="QComboBox" name="comboBox_7"/>
+          <widget class="QComboBox" name="comboBox_flowctl"/>
          </item>
         </layout>
        </widget>
@@ -102,7 +127,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
          <item row="0" column="0">
-          <widget class="QRadioButton" name="radioButton">
+          <widget class="QRadioButton" name="radioButton_ascii">
            <property name="text">
             <string>ASCII</string>
            </property>
@@ -112,28 +137,28 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QRadioButton" name="radioButton_2">
+          <widget class="QRadioButton" name="radioButton_hex">
            <property name="text">
             <string>HEX</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QCheckBox" name="checkBox">
+          <widget class="QCheckBox" name="checkBox_newLine">
            <property name="text">
             <string>自动换行</string>
            </property>
           </widget>
          </item>
          <item row="2" column="0">
-          <widget class="QCheckBox" name="checkBox_2">
+          <widget class="QCheckBox" name="checkBox_showSend">
            <property name="text">
             <string>显示发送</string>
            </property>
           </widget>
          </item>
          <item row="3" column="0">
-          <widget class="QCheckBox" name="checkBox_3">
+          <widget class="QCheckBox" name="checkBox_showTime">
            <property name="text">
             <string>显示时间</string>
            </property>
@@ -149,7 +174,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_3">
          <item row="0" column="0">
-          <widget class="QRadioButton" name="radioButton_3">
+          <widget class="QRadioButton" name="radioButton_ascii_send">
            <property name="text">
             <string>ASCII</string>
            </property>
@@ -159,21 +184,21 @@
           </widget>
          </item>
          <item row="0" column="3">
-          <widget class="QRadioButton" name="radioButton_4">
+          <widget class="QRadioButton" name="radioButton_hex_send">
            <property name="text">
             <string>HEX</string>
            </property>
           </widget>
          </item>
          <item row="1" column="3">
-          <widget class="QPushButton" name="pushButton_2">
+          <widget class="QPushButton" name="pushButton_retrans">
            <property name="text">
             <string>重复发送</string>
            </property>
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QSpinBox" name="spinBox">
+          <widget class="QSpinBox" name="spinBox_retrans_int">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
@@ -219,16 +244,20 @@
     <item>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit"/>
+       <widget class="QPlainTextEdit" name="plainTextEdit_recv">
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
-       <widget class="QComboBox" name="comboBox"/>
+       <widget class="QComboBox" name="comboBox_input_history"/>
       </item>
       <item>
-       <widget class="QPlainTextEdit" name="plainTextEdit_2"/>
+       <widget class="QPlainTextEdit" name="plainTextEdit_input"/>
       </item>
       <item alignment="Qt::AlignRight|Qt::AlignVCenter">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="pushButton_send">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -252,7 +281,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>814</width>
+     <width>891</width>
      <height>23</height>
     </rect>
    </property>
@@ -278,7 +307,7 @@
     <bool>false</bool>
    </property>
    <property name="floatable">
-    <bool>false</bool>
+    <bool>true</bool>
    </property>
    <attribute name="toolBarArea">
     <enum>TopToolBarArea</enum>
@@ -290,6 +319,7 @@
    <addaction name="action_Log"/>
    <addaction name="action_font"/>
    <addaction name="action_Language"/>
+   <addaction name="actionFind"/>
    <addaction name="action_clear"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
@@ -355,7 +385,22 @@
     <string>Language</string>
    </property>
    <property name="toolTip">
-    <string>English</string>
+    <string>Switch to English</string>
+   </property>
+  </action>
+  <action name="actionFind">
+   <property name="icon">
+    <iconset resource="monkey.qrc">
+     <normaloff>:/image/icon/find.png</normaloff>:/image/icon/find.png</iconset>
+   </property>
+   <property name="text">
+    <string>Find</string>
+   </property>
+   <property name="toolTip">
+    <string>查找</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+F</string>
    </property>
   </action>
  </widget>

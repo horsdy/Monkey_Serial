@@ -8,6 +8,8 @@
         <file>icon/work_log_on.png</file>
         <file>icon/chinese.png</file>
         <file>icon/english.png</file>
+        <file>icon/find.png</file>
+        <file>icon/serial-port.png</file>
     </qresource>
     <qresource prefix="/css">
         <file>style/black.css</file>

@@ -11,13 +11,13 @@ MAKEFILE      = Makefile.Release
 
 CC            = gcc
 CXX           = g++
-DEFINES       = -DUNICODE -DQT_QML_DEBUG -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN
+DEFINES       = -DUNICODE -DQT_QML_DEBUG -DQT_NO_DEBUG -DQT_WIDGETS_LIB -DQT_GUI_LIB -DQT_SERIALPORT_LIB -DQT_CORE_LIB -DQT_NEEDS_QMAIN
 CFLAGS        = -pipe -fno-keep-inline-dllexport -O2 -Wall -Wextra $(DEFINES)
 CXXFLAGS      = -pipe -fno-keep-inline-dllexport -O2 -std=gnu++11 -frtti -Wall -Wextra -fexceptions -mthreads $(DEFINES)
-INCPATH       = -Imonkey_serial -I. -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtWidgets -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtGui -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtANGLE -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtCore -Irelease -I. -IC:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\win32-g++ 
+INCPATH       = -Imonkey_serial -I. -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtWidgets -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtGui -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtANGLE -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtSerialPort -IC:\Qt\Qt5.7.0\5.7\mingw53_32\include\QtCore -Irelease -I. -IC:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\win32-g++ 
 LINKER      =        g++
 LFLAGS        =        -Wl,-s -Wl,-subsystem,windows -mthreads
-LIBS        =        -lmingw32 -LC:\Qt\Qt5.7.0\5.7\mingw53_32\lib C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libqtmain.a -LC:\utils\postgresql\pgsql\lib -LC:\utils\my_sql\my_sql\lib -lshell32 C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Widgets.a C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Gui.a C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Core.a 
+LIBS        =        -lmingw32 -LC:\Qt\Qt5.7.0\5.7\mingw53_32\lib C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libqtmain.a -LC:\utils\postgresql\pgsql\lib -LC:\utils\my_sql\my_sql\lib -lshell32 C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Widgets.a C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Gui.a C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5SerialPort.a C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\libQt5Core.a 
 QMAKE         = C:\Qt\Qt5.7.0\5.7\mingw53_32\bin\qmake.exe
 IDC           = idc
 IDL           = midl
@@ -44,15 +44,44 @@ OBJECTS_DIR   = release
 ####### Files
 
 SOURCES       = monkey_serial\main.cpp \
-		monkey_serial\mainwindow.cpp release\qrc_monkey.cpp \
+		monkey_serial\mainwindow.cpp \
+		monkey_serial\qextserial\qextserialport.cpp \
+		monkey_serial\qextserial\qextserialport_win.cpp release\qrc_monkey.cpp \
 		release\moc_mainwindow.cpp
 OBJECTS       = release/main.o \
 		release/mainwindow.o \
+		release/qextserialport.o \
+		release/qextserialport_win.o \
 		release/qrc_monkey.o \
 		release/moc_mainwindow.o
 
-DIST          =  monkey_serial\mainwindow.h monkey_serial\main.cpp \
-		monkey_serial\mainwindow.cpp
+DIST          = qextserial/LICENSE \
+		style/fontawesome-webfont.ttf \
+		style/qt_zh_CN.qm \
+		style/add-line_horizontal.png \
+		style/add-line_vertical.png \
+		style/array_down.png \
+		style/checkbox_checked.png \
+		style/checkbox_unchecked.png \
+		style/error.png \
+		style/Font \
+		Awesome \
+		Cheatsheet.png \
+		style/info.png \
+		style/question.png \
+		style/radio_normal.png \
+		style/radio_selected.png \
+		style/sub-line_horizontal.png \
+		style/sub-line_vertical.png \
+		style/blue.css \
+		style/gray.css \
+		style/navy.css monkey_serial\mainwindow.h \
+		monkey_serial\qextserial\qextserialport.h \
+		monkey_serial\qextserial\qextserialport_global.h \
+		monkey_serial\qextserial\qextserialport_p.h monkey_serial\main.cpp \
+		monkey_serial\mainwindow.cpp \
+		monkey_serial\qextserial\qextserialport.cpp \
+		monkey_serial\qextserial\qextserialport_win.cpp
 QMAKE_TARGET  = monkey_serial
 DESTDIR        = release\ #avoid trailing-slash linebreak
 TARGET         = monkey_serial.exe
@@ -72,10 +101,10 @@ qmake: FORCE
 qmake_all: FORCE
 
 dist:
-	$(ZIP) monkey_serial.zip $(SOURCES) $(DIST) monkey_serial\monkey_serial\monkey_serial.pro C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\spec_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\qdevice.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\device_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\common\angle.conf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\qconfig.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dcore.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dcore_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dinput.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dinput_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dlogic.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dlogic_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquick.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquick_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickinput.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickinput_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickrender.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickrender_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3drender.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3drender_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axbase.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axbase_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axcontainer.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axcontainer_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axserver.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axserver_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bluetooth.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bluetooth_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bootstrap_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_clucene_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_concurrent.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_concurrent_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_core.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_core_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_dbus.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_dbus_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designer.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designer_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designercomponents_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gamepad.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gamepad_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gui.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gui_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_help.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_help_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_location.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_location_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimedia.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimedia_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimediawidgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimediawidgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_network.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_network_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_nfc.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_nfc_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_opengl.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_opengl_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_openglextensions.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_openglextensions_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_packetprotocol_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_platformsupport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_positioning.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_positioning_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_printsupport.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_printsupport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_purchasing.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_purchasing_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmldebug_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmldevtools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmltest.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmltest_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qtmultimediaquicktools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quick.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quick_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickcontrols2.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickcontrols2_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickparticles_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quicktemplates2_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickwidgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickwidgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_script.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_script_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scripttools.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scripttools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scxml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scxml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sensors.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sensors_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialbus.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialbus_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialport.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sql.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sql_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_svg.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_svg_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_testlib.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_testlib_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uiplugin.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uitools.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uitools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_webchannel.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_webchannel_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_websockets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_websockets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_widgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_widgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_winextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_winextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xmlpatterns.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xmlpatterns_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt_functions.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\qt_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\win32-g++\qmake.conf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\spec_post.prf .qmake.stash C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exclusive_builds.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\default_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\default_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\resolve_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exclusive_builds_post.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\default_post.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\build_pass.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qml_debug.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\rtti.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\precompile_header.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\warn_on.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\resources.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\moc.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\opengl.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\uic.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\file_copies.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\windows.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\testcase_targets.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exceptions.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\yacc.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\lex.prf monkey_serial\monkey_serial.pro monkey_serial\monkey.qrc C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\qtmain.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Widgets.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Gui.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Core.prl  NO_PCH_SOURCES RESOURCES HEADERS SOURCES OBJECTIVE_SOURCES FORMS YACCSOURCES YACCSOURCES LEXSOURCES 
+	$(ZIP) monkey_serial.zip $(SOURCES) $(DIST) monkey_serial\monkey_serial\monkey_serial.pro C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\spec_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\qdevice.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\device_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\common\angle.conf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\qconfig.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dcore.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dcore_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dinput.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dinput_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dlogic.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dlogic_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquick.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquick_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickinput.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickinput_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickrender.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3dquickrender_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3drender.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_3drender_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axbase.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axbase_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axcontainer.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axcontainer_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axserver.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_axserver_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bluetooth.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bluetooth_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_bootstrap_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_clucene_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_concurrent.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_concurrent_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_core.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_core_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_dbus.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_dbus_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designer.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designer_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_designercomponents_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gamepad.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gamepad_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gui.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_gui_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_help.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_help_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_location.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_location_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimedia.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimedia_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimediawidgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_multimediawidgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_network.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_network_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_nfc.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_nfc_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_opengl.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_opengl_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_openglextensions.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_openglextensions_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_packetprotocol_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_platformsupport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_positioning.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_positioning_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_printsupport.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_printsupport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_purchasing.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_purchasing_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmldebug_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmldevtools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmltest.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qmltest_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_qtmultimediaquicktools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quick.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quick_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickcontrols2.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickcontrols2_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickparticles_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quicktemplates2_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickwidgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_quickwidgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_script.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_script_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scripttools.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scripttools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scxml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_scxml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sensors.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sensors_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialbus.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialbus_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialport.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_serialport_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sql.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_sql_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_svg.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_svg_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_testlib.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_testlib_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uiplugin.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uitools.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_uitools_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_webchannel.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_webchannel_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_websockets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_websockets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_widgets.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_widgets_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_winextras.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_winextras_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xml.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xml_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xmlpatterns.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\modules\qt_lib_xmlpatterns_private.pri C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt_functions.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\qt_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\win32-g++\qmake.conf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\spec_post.prf .qmake.stash C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exclusive_builds.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\default_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\default_pre.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\resolve_config.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exclusive_builds_post.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\default_post.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\build_pass.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qml_debug.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\rtti.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\precompile_header.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\warn_on.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\qt.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\resources.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\moc.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\opengl.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\uic.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\file_copies.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\win32\windows.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\testcase_targets.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\exceptions.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\yacc.prf C:\Qt\Qt5.7.0\5.7\mingw53_32\mkspecs\features\lex.prf monkey_serial\monkey_serial.pro monkey_serial\monkey.qrc C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\qtmain.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Widgets.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Gui.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5SerialPort.prl C:\Qt\Qt5.7.0\5.7\mingw53_32\lib\Qt5Core.prl  NO_PCH_SOURCES RESOURCES HEADERS SOURCES OBJECTIVE_SOURCES FORMS YACCSOURCES YACCSOURCES LEXSOURCES 
 
 clean: compiler_clean 
-	-$(DEL_FILE) release\main.o release\mainwindow.o release\qrc_monkey.o release\moc_mainwindow.o
+	-$(DEL_FILE) release\main.o release\mainwindow.o release\qextserialport.o release\qextserialport_win.o release\qrc_monkey.o release\moc_mainwindow.o
 
 distclean: clean 
 	-$(DEL_FILE) .qmake.stash
@@ -97,18 +126,22 @@ compiler_rcc_clean:
 	-$(DEL_FILE) release\qrc_monkey.cpp
 release/qrc_monkey.cpp: monkey_serial/monkey.qrc \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/bin/rcc.exe \
+		monkey_serial/style/black.css \
 		monkey_serial/icon/stop.png \
+		monkey_serial/icon/chinese.png \
 		monkey_serial/icon/play.png \
+		monkey_serial/icon/serial-port.png \
 		monkey_serial/icon/work_log_off.png \
 		monkey_serial/icon/font.png \
-		monkey_serial/icon/language.png \
+		monkey_serial/icon/english.png \
 		monkey_serial/icon/clear.png \
-		monkey_serial/icon/work_log_on.png
+		monkey_serial/icon/work_log_on.png \
+		monkey_serial/icon/find.png
 	C:\Qt\Qt5.7.0\5.7\mingw53_32\bin\rcc.exe -name monkey monkey_serial\monkey.qrc -o release\qrc_monkey.cpp
 
-compiler_moc_header_make_all: release/moc_mainwindow.cpp
+compiler_moc_header_make_all: release/moc_mainwindow.cpp release/moc_qextserialport.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) release\moc_mainwindow.cpp
+	-$(DEL_FILE) release\moc_mainwindow.cpp release\moc_qextserialport.cpp
 release/moc_mainwindow.cpp: C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMainWindow \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qwidget.h \
@@ -209,9 +242,74 @@ release/moc_mainwindow.cpp: C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMain
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qtouchdevice.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qtabwidget.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qicon.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/QSerialPort \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialportglobal.h \
+		monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
 		monkey_serial/mainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/bin/moc.exe
-	C:\Qt\Qt5.7.0\5.7\mingw53_32\bin\moc.exe $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/win32-g++ -IF:/Git_home/Monkey_Serial/monkey_serial -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtANGLE -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore -I. -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include-fixed -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++ -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/backward monkey_serial\mainwindow.h -o release\moc_mainwindow.cpp
+	C:\Qt\Qt5.7.0\5.7\mingw53_32\bin\moc.exe $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/win32-g++ -IF:/Git_home/Monkey_Serial/monkey_serial -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtANGLE -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore -I. -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include-fixed -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++ -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/backward monkey_serial\mainwindow.h -o release\moc_mainwindow.cpp
+
+release/moc_qextserialport.cpp: C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiodevice.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobal.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qconfig.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfeatures.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsystemdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qprocessordetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcompilerdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypeinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypetraits.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qisenum.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsysinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlogging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qflags.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbasicatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_bootstrap.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qgenericatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_cxx11.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_msvc.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobalstatic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmutex.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnumeric.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qversiontagging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnamespace.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs_impl.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstring.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qchar.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qrefcount.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qarraydata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringbuilder.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qalgorithms.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiterator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhashfunctions.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpair.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearraylist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qregexp.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringmatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcoreevent.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qscopedpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmetatype.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvarlengtharray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcontainerfwd.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject_impl.h \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
+		monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/bin/moc.exe
+	C:\Qt\Qt5.7.0\5.7\mingw53_32\bin\moc.exe $(DEFINES) -D__GNUC__ -DWIN32 -IC:/Qt/Qt5.7.0/5.7/mingw53_32/mkspecs/win32-g++ -IF:/Git_home/Monkey_Serial/monkey_serial -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtANGLE -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort -IC:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore -I. -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/lib/gcc/i686-w64-mingw32/5.3.0/include-fixed -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++ -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/i686-w64-mingw32 -IC:/Qt/Qt5.7.0/Tools/mingw530_32/i686-w64-mingw32/include/c++/backward monkey_serial\qextserial\qextserialport.h -o release\moc_qextserialport.cpp
 
 compiler_moc_source_make_all:
 compiler_moc_source_clean:
@@ -335,6 +433,16 @@ release/main.o: monkey_serial/main.cpp monkey_serial/mainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qtouchdevice.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qtabwidget.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qicon.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/QSerialPort \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialportglobal.h \
+		monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QApplication \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qapplication.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcoreapplication.h \
@@ -445,6 +553,16 @@ release/mainwindow.o: monkey_serial/mainwindow.cpp monkey_serial/mainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qtouchdevice.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qtabwidget.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtGui/qicon.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QMessageBox \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qmessagebox.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qdialog.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/QSerialPort \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialportglobal.h \
+		monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
 		ui_mainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QVariant \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QAction \
@@ -520,8 +638,272 @@ release/mainwindow.o: monkey_serial/mainwindow.cpp monkey_serial/mainwindow.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QToolBar \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/qtoolbar.h \
 		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QVBoxLayout \
-		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QWidget
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtWidgets/QWidget \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtDebug \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/QtSerialPort \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/QtSerialPortDepends \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtCore \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtCoreDepends \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstractanimation.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qanimationgroup.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qparallelanimationgroup.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpauseanimation.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpropertyanimation.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvariantanimation.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qeasingcurve.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsequentialanimationgroup.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtextcodec.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qendian.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlibraryinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qdatetime.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbuffer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qdir.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfileinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qdiriterator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfileselector.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QObject \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QStringList \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfilesystemwatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlockfile.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qloggingcategory.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qprocess.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qresource.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsavefile.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsettings.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstandardpaths.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstorageinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtemporarydir.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QScopedPointer \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtemporaryfile.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstractproxymodel.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qidentityproxymodel.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsortfilterproxymodel.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringlistmodel.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qjsonarray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qjsonvalue.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qjsondocument.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qjsonobject.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstracteventdispatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstractnativeeventfilter.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbasictimer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmath.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmetaobject.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmimedata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectcleanuphandler.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsharedmemory.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsignalmapper.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsocketnotifier.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsystemsemaphore.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtimer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtranslator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qwineventnotifier.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmimedatabase.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmimetype.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfactoryinterface.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlibrary.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qplugin.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpluginloader.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/quuid.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstractstate.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qabstracttransition.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qeventtransition.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfinalstate.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhistorystate.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsignaltransition.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstate.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstatemachine.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qexception.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfuture.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfutureinterface.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qrunnable.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qresultstore.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfuturesynchronizer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfuturewatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qreadwritelock.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsemaphore.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qthread.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qthreadpool.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qthreadstorage.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qwaitcondition.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qarraydataops.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qarraydatapointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbitarray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearraymatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcache.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcollator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcommandlineoption.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcommandlineparser.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcryptographichash.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qelapsedtimer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlinkedlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmessageauthenticationcode.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qqueue.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qscopedvaluerollback.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstack.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtextboundaryfinder.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtimeline.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtimezone.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qversionnumber.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qxmlstream.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtcoreversion.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qserialportinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtSerialPort/qtserialportversion.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\mainwindow.o monkey_serial\mainwindow.cpp
+
+release/qextserialport.o: monkey_serial/qextserial/qextserialport.cpp monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiodevice.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobal.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qconfig.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfeatures.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsystemdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qprocessordetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcompilerdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypeinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypetraits.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qisenum.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsysinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlogging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qflags.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbasicatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_bootstrap.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qgenericatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_cxx11.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_msvc.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobalstatic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmutex.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnumeric.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qversiontagging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnamespace.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs_impl.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstring.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qchar.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qrefcount.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qarraydata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringbuilder.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qalgorithms.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiterator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhashfunctions.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpair.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearraylist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qregexp.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringmatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcoreevent.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qscopedpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmetatype.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvarlengtharray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcontainerfwd.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject_impl.h \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
+		monkey_serial/qextserial/qextserialport_p.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QReadWriteLock \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qreadwritelock.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qt_windows.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QDebug \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qdebug.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhash.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmap.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtextstream.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlocale.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvariant.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qshareddata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvector.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpoint.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qset.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcontiguouscache.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsharedpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsharedpointer_impl.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QReadLocker \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QWriteLocker \
+		release/moc_qextserialport.cpp
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\qextserialport.o monkey_serial\qextserial\qextserialport.cpp
+
+release/qextserialport_win.o: monkey_serial/qextserial/qextserialport_win.cpp monkey_serial/qextserial/qextserialport.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QIODevice \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiodevice.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobal.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qconfig.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qfeatures.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsystemdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qprocessordetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcompilerdetection.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypeinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtypetraits.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qisenum.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsysinfo.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlogging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qflags.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbasicatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_bootstrap.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qgenericatomic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_cxx11.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qatomic_msvc.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qglobalstatic.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmutex.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnumeric.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qversiontagging.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qnamespace.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobjectdefs_impl.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstring.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qchar.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qrefcount.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qarraydata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringbuilder.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qalgorithms.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qiterator.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhashfunctions.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpair.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qbytearraylist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringlist.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qregexp.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qstringmatcher.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcoreevent.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qscopedpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmetatype.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvarlengtharray.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcontainerfwd.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qobject_impl.h \
+		monkey_serial/qextserial/qextserialport_global.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QtGlobal \
+		monkey_serial/qextserial/qextserialport_p.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QReadWriteLock \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qreadwritelock.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qt_windows.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QThread \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qthread.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QMutexLocker \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QDebug \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qdebug.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qhash.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qmap.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qtextstream.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qlocale.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvariant.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qshareddata.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qvector.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qpoint.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qset.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qcontiguouscache.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsharedpointer.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qsharedpointer_impl.h \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QRegExp \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QMetaType \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/QWinEventNotifier \
+		C:/Qt/Qt5.7.0/5.7/mingw53_32/include/QtCore/qwineventnotifier.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\qextserialport_win.o monkey_serial\qextserial\qextserialport_win.cpp
 
 release/qrc_monkey.o: release/qrc_monkey.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o release\qrc_monkey.o release\qrc_monkey.cpp
