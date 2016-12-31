@@ -1,10 +1,12 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QTGUI>
 #include <QMainWindow>
 #include <QMessageBox>
 #include <QtSerialPort/QSerialPort>
 #include "qextserial/qextserialport.h"
+#include <QFileDialog>
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +24,7 @@ private:
     void fillPortsInfo();
     void fillPortsParameters();
     void initSignalSlot();
+    void appendContent(const QString &showBuf, bool isRecv = true);
 
 private slots:
     void on_action_port_triggered();
@@ -37,16 +40,32 @@ private slots:
 
     void on_pushButton_send_clicked();
 
+    void on_checkBox_showTime_stateChanged(int arg1);
+
+    void on_checkBox_newLine_stateChanged(int arg1);
+
+    void on_radioButton_ascii_toggled(bool checked);
+
+    void on_radioButton_hex_toggled(bool checked);
+
+    void on_pushButton_retrans_clicked();
+    void on_retrans();
+
+    void on_action_exit_triggered();
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
     QStringList portList;
+    QTimer *retransTimer;
+    QString logfile_path;
 
     bool isSerialConnected = false;
     bool isLoging = false;       //read from setting file
     bool isShowTime = false;     //read from setting file
     bool isShowSendData = false; //read from setting file
     bool isChinese = true;       //read from setting file
+    bool isRetransing = false;
 };
 
 #endif // MAINWINDOW_H

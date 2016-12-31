@@ -146,7 +146,7 @@
          <item row="1" column="0">
           <widget class="QCheckBox" name="checkBox_newLine">
            <property name="text">
-            <string>自动换行</string>
+            <string>换行显示</string>
            </property>
           </widget>
          </item>

@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     serial = new QextSerialPort( );
+    retransTimer = new QTimer(this);
+
     fillPortsInfo();
     fillPortsParameters();
     initSignalSlot();
@@ -19,6 +21,13 @@ MainWindow::~MainWindow()
 {
     delete ui;
     delete serial;
+}
+
+void MainWindow::initSignalSlot()
+{
+    connect(ui->comboBox_baud, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::customBaud);
+    connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+    connect(retransTimer, SIGNAL(timeout()), this, SLOT(on_retrans()) );
 }
 
 void MainWindow::fillPortsInfo()
@@ -72,6 +81,37 @@ void MainWindow::fillPortsParameters()
     ui->comboBox_flowctl->addItem(tr("XON/XOFF"), FLOW_XONXOFF);
 }
 
+void MainWindow::appendContent(const QString &showBuf, bool isRecv)
+{
+    QString myShowBuf;
+
+    if (false == isSerialConnected)
+        return;
+
+    if (ui->checkBox_showTime->isChecked())
+    {
+        if (isRecv)
+        {
+            myShowBuf = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss.zzz @R] ");
+        }
+        else
+        {
+            myShowBuf = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss.zzz @T] ");
+        }
+    }
+
+    myShowBuf += showBuf;
+    if (ui->checkBox_newLine->isChecked())
+    {
+        ui->plainTextEdit_recv->appendPlainText(myShowBuf);
+    }
+    else
+    {
+        myShowBuf = ui->plainTextEdit_recv->document()->toPlainText() + myShowBuf;
+        ui->plainTextEdit_recv->setPlainText(myShowBuf);
+    }
+}
+
 void MainWindow::on_action_port_triggered()
 {
     this->isSerialConnected = !this->isSerialConnected;
@@ -110,6 +150,8 @@ void MainWindow::on_action_port_triggered()
         ui->action_port->setToolTip("连接");
 
         ui->groupBox->setEnabled(true);
+        isRetransing = false;
+        retransTimer->stop();
         serial->close();
     }
 }
@@ -120,17 +162,23 @@ void MainWindow::on_action_Log_triggered()
 
     if (this->isLoging)
     {
-        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
-        ui->action_Log->setToolTip("停止日志");
-
-        //Close File
+        //若没有设置log文件路径，则弹窗让用户选择文件夹
+        logfile_path = QFileDialog::getExistingDirectory(this,"Log File Path","./");
+        if(logfile_path.isEmpty())
+        {
+            this->isLoging = false;
+        }
+        else
+        {
+            ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
+            ui->action_Log->setToolTip("停止日志");
+        }
     }
     else
     {
         ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
         ui->action_Log->setToolTip("启动日志");
-        //若没有设置log文件路径，则弹窗让用户选择文件夹
-
+        //Close File
     }
 }
 
@@ -167,9 +215,26 @@ void MainWindow::customBaud(int index)
 void MainWindow::readData()
 {
     QByteArray data = serial->readAll();
-    QString buf = QString(data);
+    QString showBuf;
+    QString asciiBuf = QString(data);
+    QString hexstr;
 
-    ui->plainTextEdit_recv->setPlainText( ui->plainTextEdit_recv->document()->toPlainText() + buf );
+    if (ui->radioButton_ascii->isChecked())
+    {
+        showBuf = asciiBuf;
+    }
+    else if (ui->radioButton_hex->isChecked())
+    {
+        int i = 0;
+
+        for (i = 0; i < data.size(); i++)
+        {
+            hexstr += QString("%1 ").arg(data.at(i), 2, 16);
+        }
+        showBuf = hexstr;
+    }
+
+    appendContent(showBuf);
 }
 
 void MainWindow::on_action_clear_triggered()
@@ -182,18 +247,135 @@ void MainWindow::on_pushButton_send_clicked()
     if (isSerialConnected)
     {
         QByteArray data = ui->plainTextEdit_input->toPlainText().toLatin1();
-        serial->write(data);
+        QByteArray mydata;
+
+        if (ui->radioButton_ascii_send->isChecked())
+        {
+            mydata = data;
+        }
+        else if (ui->radioButton_hex_send->isChecked())
+        {
+            int i = 0;
+            //remove all non-hex char
+            for (i = 0; i < data.size(); )
+            {
+                if (data.at(i) >= '0' && data.at(i) <= '9' ||
+                    data.at(i) >= 'a' && data.at(i) <= 'f' ||
+                    data.at(i) >= 'A' && data.at(i) <= 'F' )
+                {
+                    i++;
+                }
+                else
+                {
+                    data.remove(i, 1);
+                }
+            }
+            mydata = QByteArray::fromHex(data);
+        }
+
+        serial->write(mydata);
+        if (ui->checkBox_showSend->isChecked())
+        {
+            //insert space into hex data
+            if (ui->radioButton_hex_send->isChecked() )
+            {
+                QString str;
+                int i = 0;
+
+                for (i = 0; i < mydata.size(); i++)
+                {
+                    str += QString("%1 ").arg(mydata.at(i), 2, 16);
+                }
+                appendContent(str, false);
+            }
+            else
+            {
+                appendContent(QString(mydata), false);
+            }
+        }
+    }
+    else
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Serial Port Not Connected."));
     }
 }
 
-
-
-
-
-
-/* add function above this */
-void MainWindow::initSignalSlot()
+void MainWindow::on_retrans()
 {
-    connect(ui->comboBox_baud, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::customBaud);
-    connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
+    on_pushButton_send_clicked();
+    retransTimer->start(ui->spinBox_retrans_int->value());
+}
+
+void MainWindow::on_checkBox_showTime_stateChanged(int arg1)
+{
+    if (Qt::Checked == arg1)
+    {
+        ui->checkBox_newLine->setChecked(true);
+        ui->checkBox_newLine->setEnabled(false);
+    }
+    else if (Qt::Unchecked == arg1)
+    {
+        ui->checkBox_newLine->setChecked(false);
+        ui->checkBox_newLine->setEnabled(true);
+    }
+}
+
+void MainWindow::on_checkBox_newLine_stateChanged(int arg1)
+{
+    if (isSerialConnected && Qt::Unchecked == arg1)
+    {
+        ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
+    }
+}
+
+void MainWindow::on_radioButton_ascii_toggled(bool checked)
+{
+    if (isSerialConnected && checked)
+        ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
+}
+
+void MainWindow::on_radioButton_hex_toggled(bool checked)
+{
+    if (isSerialConnected && checked)
+    {
+        ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
+    }
+}
+
+void MainWindow::on_pushButton_retrans_clicked()
+{
+    if (!isSerialConnected)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Serial Port Not Connected."));
+        return;
+    }
+    if (ui->plainTextEdit_input->document()->toPlainText().isEmpty())
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Send Content Is Empty."));
+        return;
+    }
+    if (ui->spinBox_retrans_int->value() == 0)
+    {
+        QMessageBox::critical(this, tr("Error"), tr("Zero Resend Interval."));
+        return;
+    }
+
+    isRetransing = !isRetransing;
+    if (isRetransing)
+    {
+        retransTimer->setInterval(ui->spinBox_retrans_int->value());
+        retransTimer->setSingleShot(false);
+        retransTimer->start();
+        ui->pushButton_retrans->setText("停止");
+    }
+    else
+    {
+        retransTimer->stop();
+        ui->pushButton_retrans->setText("重复发送");
+    }
+}
+
+void MainWindow::on_action_exit_triggered()
+{
+    QApplication::exit();
 }
