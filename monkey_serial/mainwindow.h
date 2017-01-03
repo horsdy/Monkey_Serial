@@ -7,6 +7,7 @@
 #include <QtSerialPort/QSerialPort>
 #include "qextserial/qextserialport.h"
 #include <QFileDialog>
+#include <QSplitter>
 
 namespace Ui {
 class MainWindow;
@@ -59,6 +60,10 @@ private:
     QStringList portList;
     QTimer *retransTimer;
     QString logfile_path;
+    QFile *logFile;
+    QLabel *connLabel;
+    QLabel *RXLabel;
+    QLabel *TXLabel;
 
     bool isSerialConnected = false;
     bool isLoging = false;       //read from setting file
@@ -66,6 +71,9 @@ private:
     bool isShowSendData = false; //read from setting file
     bool isChinese = true;       //read from setting file
     bool isRetransing = false;
+
+    int rxBytesTotal = 0;
+    int txBytesTotal = 0;
 };
 
 #endif // MAINWINDOW_H

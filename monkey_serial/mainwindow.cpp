@@ -3,6 +3,9 @@
 #include <QtDebug>
 #include <QtSerialPort>
 
+#define RED_TEXT_STYLESHEET   "color: rgb(170, 0, 0);font: 10pt \"微软雅黑\";"
+#define GREEN_TEXT_STYLESHEET "color: rgb(0, 85, 0); font: 10pt \"微软雅黑\";"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -11,6 +14,38 @@ MainWindow::MainWindow(QWidget *parent) :
 
     serial = new QextSerialPort( );
     retransTimer = new QTimer(this);
+    logFile = new QFile(this);
+    connLabel = new QLabel(" Disconnected", this);
+    RXLabel = new QLabel("RX : ", this);
+    TXLabel = new QLabel("TX : ", this);
+    QLabel *voidLabel = new QLabel(this);
+
+    connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
+    ui->statusBar->addWidget(connLabel, 1);
+    ui->statusBar->addWidget(RXLabel, 1);
+    ui->statusBar->addWidget(TXLabel, 1);
+    ui->statusBar->addWidget(voidLabel, 3);
+
+    QSplitter *pSpliter = new QSplitter(Qt::Vertical, this);
+    QVBoxLayout *pVboxLayoutRight = new QVBoxLayout(this);
+    QWidget *rightButtomWidget = new QWidget(this);
+
+    ui->horizontalLayout_2->removeItem(ui->verticalLayout_2);
+    pVboxLayoutRight->addWidget(ui->comboBox_input_history);
+    pVboxLayoutRight->addWidget(ui->plainTextEdit_input);
+    pVboxLayoutRight->addWidget(ui->pushButton_send);
+    pVboxLayoutRight->setContentsMargins(0,0,0,0);
+    pVboxLayoutRight->setAlignment(ui->pushButton_send, Qt::AlignRight);
+    rightButtomWidget->setLayout(pVboxLayoutRight);
+
+    pSpliter->addWidget(ui->plainTextEdit_recv);
+    pSpliter->addWidget(rightButtomWidget);
+
+    //top 4:1 buttom
+    pSpliter->setStretchFactor(0, 4);
+    pSpliter->setStretchFactor(1, 1);
+
+    ui->horizontalLayout_2->addWidget(pSpliter);
 
     fillPortsInfo();
     fillPortsParameters();
@@ -103,12 +138,23 @@ void MainWindow::appendContent(const QString &showBuf, bool isRecv)
     myShowBuf += showBuf;
     if (ui->checkBox_newLine->isChecked())
     {
+        //show in the new line
         ui->plainTextEdit_recv->appendPlainText(myShowBuf);
     }
     else
     {
         myShowBuf = ui->plainTextEdit_recv->document()->toPlainText() + myShowBuf;
         ui->plainTextEdit_recv->setPlainText(myShowBuf);
+    }
+
+    //write to log file
+    if (isLoging)
+    {
+        if (ui->checkBox_newLine->isChecked())
+        {
+            myShowBuf.append("\r\n");
+        }
+        logFile->write(myShowBuf.toLatin1().data(), myShowBuf.size());
     }
 }
 
@@ -140,6 +186,8 @@ void MainWindow::on_action_port_triggered()
         if (serial->open(QIODevice::ReadWrite)) {
             //open ok
             ui->groupBox->setEnabled(false);
+            connLabel->setStyleSheet(GREEN_TEXT_STYLESHEET);
+            connLabel->setText(" Connected");
         } else {
             QMessageBox::critical(this, tr("Error"), serial->errorString());
         }
@@ -152,6 +200,15 @@ void MainWindow::on_action_port_triggered()
         ui->groupBox->setEnabled(true);
         isRetransing = false;
         retransTimer->stop();
+
+        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
+        ui->action_Log->setToolTip("启动日志");
+        connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
+        connLabel->setText(" Disconnected");
+        logfile_path.clear();
+        //Close File
+        logFile->close();
+
         serial->close();
     }
 }
@@ -163,22 +220,35 @@ void MainWindow::on_action_Log_triggered()
     if (this->isLoging)
     {
         //若没有设置log文件路径，则弹窗让用户选择文件夹
-        logfile_path = QFileDialog::getExistingDirectory(this,"Log File Path","./");
+        if (logfile_path.isEmpty())
+        {
+            logfile_path = QFileDialog::getExistingDirectory(this,"Log File Path","./");
+        }
+
         if(logfile_path.isEmpty())
         {
             this->isLoging = false;
         }
         else
         {
+            QString filename;
+
             ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
             ui->action_Log->setToolTip("停止日志");
+            filename = QDateTime::currentDateTime().toString("Log_yyyyMMdd_hhmmss");
+            filename.append(".txt");
+            QDir::setCurrent(logfile_path);
+            logFile->setFileName(filename);
+            logFile->open(QIODevice::WriteOnly);
         }
     }
     else
     {
         ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
         ui->action_Log->setToolTip("启动日志");
+        logfile_path.clear();
         //Close File
+        logFile->close();
     }
 }
 
@@ -235,11 +305,19 @@ void MainWindow::readData()
     }
 
     appendContent(showBuf);
+
+    //update status bar
+    rxBytesTotal += data.size();
+    RXLabel->setText("RX : " + QString::number(rxBytesTotal) + " Bytes");
 }
 
 void MainWindow::on_action_clear_triggered()
 {
     ui->plainTextEdit_recv->clear();
+    rxBytesTotal = 0;
+    txBytesTotal = 0;
+    RXLabel->setText("RX : ");
+    TXLabel->setText("TX : ");
 }
 
 void MainWindow::on_pushButton_send_clicked()
@@ -274,6 +352,11 @@ void MainWindow::on_pushButton_send_clicked()
         }
 
         serial->write(mydata);
+
+        //update status bar
+        txBytesTotal += mydata.size();
+        TXLabel->setText("TX : " + QString::number(txBytesTotal)  + " Bytes");
+
         if (ui->checkBox_showSend->isChecked())
         {
             //insert space into hex data
