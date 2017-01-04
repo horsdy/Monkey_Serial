@@ -20,12 +20,14 @@ MainWindow::MainWindow(QWidget *parent) :
     TXLabel = new QLabel("TX : ", this);
     QLabel *voidLabel = new QLabel(this);
 
+    //status bar
     connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
     ui->statusBar->addWidget(connLabel, 1);
     ui->statusBar->addWidget(RXLabel, 1);
     ui->statusBar->addWidget(TXLabel, 1);
     ui->statusBar->addWidget(voidLabel, 3);
 
+    //Spliter
     QSplitter *pSpliter = new QSplitter(Qt::Vertical, this);
     QVBoxLayout *pVboxLayoutRight = new QVBoxLayout(this);
     QWidget *rightButtomWidget = new QWidget(this);
