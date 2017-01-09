@@ -8,6 +8,7 @@
 #include "qextserial/qextserialport.h"
 #include <QFileDialog>
 #include <QSplitter>
+#include <QTSQL>
 
 namespace Ui {
 class MainWindow;
@@ -54,6 +55,8 @@ private slots:
 
     void on_action_exit_triggered();
 
+    void on_comboBox_input_history_activated(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
@@ -64,6 +67,7 @@ private:
     QLabel *connLabel;
     QLabel *RXLabel;
     QLabel *TXLabel;
+    QSqlDatabase db;
 
     bool isSerialConnected = false;
     bool isLoging = false;       //read from setting file

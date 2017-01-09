@@ -5,6 +5,7 @@
 
 #define RED_TEXT_STYLESHEET   "color: rgb(170, 0, 0);font: 10pt \"微软雅黑\";"
 #define GREEN_TEXT_STYLESHEET "color: rgb(0, 85, 0); font: 10pt \"微软雅黑\";"
+#define INPUT_MAX 20
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -16,9 +17,10 @@ MainWindow::MainWindow(QWidget *parent) :
     retransTimer = new QTimer(this);
     logFile = new QFile(this);
     connLabel = new QLabel(" Disconnected", this);
-    RXLabel = new QLabel("RX : ", this);
-    TXLabel = new QLabel("TX : ", this);
+    RXLabel = new QLabel("RX : 0 Bytes", this);
+    TXLabel = new QLabel("TX : 0 Bytes", this);
     QLabel *voidLabel = new QLabel(this);
+    ui->comboBox_input_history->setMaxCount(INPUT_MAX);
 
     //status bar
     connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
@@ -52,10 +54,39 @@ MainWindow::MainWindow(QWidget *parent) :
     fillPortsInfo();
     fillPortsParameters();
     initSignalSlot();
+
+    //init db
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setHostName("localhost"); //设置数据库主机名
+    db.setDatabaseName("InputHistory.db"); //设置数据库名
+    if (db.open())
+    {
+        qDebug() << "Database open OK";
+        //read input history
+        QSqlQuery sqlQuery;
+        sqlQuery.prepare("select data from input");
+        if (sqlQuery.exec())
+        {
+            qDebug() << "select DB OK.";
+            while(sqlQuery.next())
+            {
+                QString str = sqlQuery.value(0).toString();
+                ui->comboBox_input_history->insertItem(0, str);
+                ui->comboBox_input_history->setCurrentText(str);
+            }
+        }
+        else
+            qDebug() << "select DB Fail: " << sqlQuery.lastError();
+    }
+    else
+    {
+        qDebug() << "Database open Fail: " << db.lastError();
+    }
 }
 
 MainWindow::~MainWindow()
 {
+    db.close();
     delete ui;
     delete serial;
 }
@@ -318,8 +349,8 @@ void MainWindow::on_action_clear_triggered()
     ui->plainTextEdit_recv->clear();
     rxBytesTotal = 0;
     txBytesTotal = 0;
-    RXLabel->setText("RX : ");
-    TXLabel->setText("TX : ");
+    RXLabel->setText("RX : 0 Bytes");
+    TXLabel->setText("TX : 0 Bytes");
 }
 
 void MainWindow::on_pushButton_send_clicked()
@@ -359,6 +390,7 @@ void MainWindow::on_pushButton_send_clicked()
         txBytesTotal += mydata.size();
         TXLabel->setText("TX : " + QString::number(txBytesTotal)  + " Bytes");
 
+        //show send content
         if (ui->checkBox_showSend->isChecked())
         {
             //insert space into hex data
@@ -377,6 +409,42 @@ void MainWindow::on_pushButton_send_clicked()
             {
                 appendContent(QString(mydata), false);
             }
+        }
+
+        //write to combobox
+        int idx = 0;
+        for (idx = 0; idx < ui->comboBox_input_history->count(); idx++)
+        {
+            if (data == ui->comboBox_input_history->itemText(idx))
+            {
+                break;
+            }
+        }
+
+        //new input data
+        if (idx >= ui->comboBox_input_history->count())
+        {
+            //write to database
+            QSqlQuery sqlQuery;
+            if (ui->comboBox_input_history->count() >= INPUT_MAX)
+            {
+                //delete first record
+                sqlQuery.prepare("delete from input where data = (SELECT data from input LIMIT 0,1)");
+                if (sqlQuery.exec())
+                    qDebug() << "delete DB OK.";
+                else
+                    qDebug() << "delete DB Fail: " << sqlQuery.lastError();
+            }
+
+            sqlQuery.prepare("insert into input values(?)");
+            sqlQuery.addBindValue(data);
+            if (sqlQuery.exec())
+                qDebug() << "insert DB OK.";
+            else
+                qDebug() << "insert DB Fail: " << sqlQuery.lastError();
+
+            ui->comboBox_input_history->insertItem(0, QString(data));
+            ui->comboBox_input_history->setCurrentText(QString(data));
         }
     }
     else
@@ -463,4 +531,10 @@ void MainWindow::on_pushButton_retrans_clicked()
 void MainWindow::on_action_exit_triggered()
 {
     QApplication::exit();
+}
+
+void MainWindow::on_comboBox_input_history_activated(const QString &arg1)
+{
+    ui->plainTextEdit_input->clear();
+    ui->plainTextEdit_input->appendPlainText(arg1);
 }
