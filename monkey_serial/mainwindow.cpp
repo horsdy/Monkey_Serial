@@ -412,8 +412,7 @@ void MainWindow::on_pushButton_send_clicked()
         }
 
         //write to combobox
-        int idx = 0;
-        for (idx = 0; idx < ui->comboBox_input_history->count(); idx++)
+        for (int idx = 0; idx < ui->comboBox_input_history->count(); idx++)
         {
             if (data == ui->comboBox_input_history->itemText(idx))
             {
