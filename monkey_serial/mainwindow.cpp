@@ -2,10 +2,13 @@
 #include "ui_mainwindow.h"
 #include <QtDebug>
 #include <QtSerialPort>
+#include <QSettings>
 
 #define RED_TEXT_STYLESHEET   "color: rgb(170, 0, 0);font: 10pt \"微软雅黑\";"
 #define GREEN_TEXT_STYLESHEET "color: rgb(0, 85, 0); font: 10pt \"微软雅黑\";"
 #define INPUT_MAX 20
+
+#define INIT_FILE_PATH "./serial_setting.ini"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -51,8 +54,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->horizontalLayout_2->addWidget(pSpliter);
 
+    //ui->plainTextEdit_recv->
+
     fillPortsInfo();
+    //read port setting file
     fillPortsParameters();
+    readIniFile();
     initSignalSlot();
 
     //init db
@@ -82,6 +89,9 @@ MainWindow::MainWindow(QWidget *parent) :
     {
         qDebug() << "Database open Fail: " << db.lastError();
     }
+
+    init_ok_flag = true;
+    qDebug() << "Init OK";
 }
 
 MainWindow::~MainWindow()
@@ -91,9 +101,53 @@ MainWindow::~MainWindow()
     delete serial;
 }
 
+//Read setting file about port, show
+void MainWindow::readIniFile()
+{
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file)
+        return;
+
+    QString BaudRate = file->value("/PortSetting/BaudRate").toString();
+    QString DataBit = file->value("/PortSetting/DataBit").toString();
+    QString ParityBit = file->value("/PortSetting/ParityBit").toString();
+    QString StopBit = file->value("/PortSetting/StopBit").toString();
+    QString FlowCtrl = file->value("/PortSetting/FlowCtrl").toString();
+    QString RecvCode = file->value("/RecvSetting/RecvCode").toString();
+    bool ShownInNewline = file->value("/RecvSetting/ShownInNewline").toBool();
+    bool ShowSend = file->value("/RecvSetting/ShowSend").toBool();
+    bool ShowTime = file->value("/RecvSetting/ShowTime").toBool();
+    QString SendCode = file->value("/SendSetting/SendCode").toString();
+    int Interval = file->value("/ResendSetting/Interval").toInt();
+
+    ui->comboBox_baud->setCurrentText(BaudRate);
+    ui->comboBox_databit->setCurrentText(DataBit);
+    ui->comboBox_checkbit->setCurrentText(ParityBit);
+    ui->comboBox_stopbit->setCurrentText(StopBit);
+    ui->comboBox_flowctl->setCurrentText(FlowCtrl);
+
+    if (RecvCode.compare("ASCII", Qt::CaseInsensitive) == 0)
+        ui->radioButton_ascii->setChecked(true);
+    else
+        ui->radioButton_hex->setChecked(true);
+
+    ui->checkBox_newLine->setChecked(ShownInNewline);
+    ui->checkBox_showSend->setChecked(ShowSend);
+    ui->checkBox_showTime->setChecked(ShowTime);
+
+    if (SendCode.compare("ASCII", Qt::CaseInsensitive) == 0)
+        ui->radioButton_ascii_send->setChecked(true);
+    else
+        ui->radioButton_hex_send->setChecked(true);
+
+    ui->spinBox_retrans_int->setValue(Interval);
+
+    delete file;
+}
+
 void MainWindow::initSignalSlot()
 {
-    connect(ui->comboBox_baud, static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::customBaud);
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
     connect(retransTimer, SIGNAL(timeout()), this, SLOT(on_retrans()) );
 }
@@ -131,8 +185,8 @@ void MainWindow::fillPortsParameters()
 
     //parity
     ui->comboBox_checkbit->addItem(tr("None"), PAR_NONE);
-    ui->comboBox_checkbit->addItem(tr("Even"), PAR_ODD);
-    ui->comboBox_checkbit->addItem(tr("Odd"), PAR_EVEN);
+    ui->comboBox_checkbit->addItem(tr("Even"), PAR_EVEN);
+    ui->comboBox_checkbit->addItem(tr("Odd"), PAR_ODD);
 #if defined(Q_OS_WIN) || defined(qdoc)
     ui->comboBox_checkbit->addItem(tr("Mark"), PAR_MARK);
 #endif
@@ -193,13 +247,8 @@ void MainWindow::appendContent(const QString &showBuf, bool isRecv)
 
 void MainWindow::on_action_port_triggered()
 {
-    this->isSerialConnected = !this->isSerialConnected;
-
-    if (this->isSerialConnected)
+    if (!this->isSerialConnected)
     {
-        ui->action_port->setIcon(QIcon(":/image/icon/stop.png"));
-        ui->action_port->setToolTip("断开连接");
-
         BaudRateType baud = static_cast<BaudRateType>(ui->comboBox_baud->currentText().toInt());
         DataBitsType dataBits = static_cast<DataBitsType>(
                     ui->comboBox_databit->itemData(ui->comboBox_databit->currentIndex()).toInt());
@@ -210,23 +259,51 @@ void MainWindow::on_action_port_triggered()
         FlowType flowControl = static_cast<FlowType>(
                     ui->comboBox_flowctl->itemData(ui->comboBox_flowctl->currentIndex()).toInt());
 
+        if (baud == 0)
+        {
+            QMessageBox::critical(this, tr("Error"), "Baud rate can't be 0");
+            return;
+        }
+
         serial->setPortName( portList.at(ui->comboBox_port->currentIndex()) );
         serial->setBaudRate( baud);
         serial->setDataBits(dataBits);
         serial->setParity(parity);
         serial->setStopBits(stopBits);
         serial->setFlowControl(flowControl);
+
         if (serial->open(QIODevice::ReadWrite)) {
             //open ok
+            this->isSerialConnected = true;
+            ui->action_port->setIcon(QIcon(":/image/icon/stop.png"));
+            ui->action_port->setToolTip("断开连接");
             ui->groupBox->setEnabled(false);
             connLabel->setStyleSheet(GREEN_TEXT_STYLESHEET);
             connLabel->setText(" Connected");
         } else {
+            this->isSerialConnected = false;
+            ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
+            ui->action_port->setToolTip("连接");
+
+            ui->groupBox->setEnabled(true);
+            isRetransing = false;
+            retransTimer->stop();
+
+            ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
+            ui->action_Log->setToolTip("启动日志");
+            connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
+            connLabel->setText(" Disconnected");
+            logfile_path.clear();
+            //Close File
+            logFile->close();
+            serial->close();
+
             QMessageBox::critical(this, tr("Error"), serial->errorString());
         }
     }
     else
     {
+        this->isSerialConnected = false;
         ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
         ui->action_port->setToolTip("连接");
 
@@ -298,20 +375,6 @@ void MainWindow::on_action_Language_triggered()
     {
         ui->action_Language->setIcon(QIcon(":/image/icon/chinese.png"));
         ui->action_Language->setToolTip("切换到中文");
-    }
-}
-
-
-void MainWindow::customBaud(int index)
-{
-    if (8 == index)
-    {
-        ui->comboBox_baud->setEditable(true);
-        ui->comboBox_baud->clearEditText();
-    }
-    else
-    {
-        ui->comboBox_baud->setEditable(false);
     }
 }
 
@@ -412,7 +475,8 @@ void MainWindow::on_pushButton_send_clicked()
         }
 
         //write to combobox
-        for (int idx = 0; idx < ui->comboBox_input_history->count(); idx++)
+        int idx;
+        for (idx = 0; idx < ui->comboBox_input_history->count(); idx++)
         {
             if (data == ui->comboBox_input_history->itemText(idx))
             {
@@ -470,6 +534,19 @@ void MainWindow::on_checkBox_showTime_stateChanged(int arg1)
         ui->checkBox_newLine->setChecked(false);
         ui->checkBox_newLine->setEnabled(true);
     }
+
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file || FALSE == init_ok_flag)
+        return;
+
+    if (Qt::Checked == arg1)
+        file->setValue("/RecvSetting/ShowTime", "TRUE");
+    else
+        file->setValue("/RecvSetting/ShowTime", "FALSE");
+
+    delete file;
 }
 
 void MainWindow::on_checkBox_newLine_stateChanged(int arg1)
@@ -478,12 +555,35 @@ void MainWindow::on_checkBox_newLine_stateChanged(int arg1)
     {
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
     }
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (Qt::Checked == arg1)
+        file->setValue("/RecvSetting/ShownInNewline", "TRUE");
+    else
+        file->setValue("/RecvSetting/ShownInNewline", "FALSE");
+
+    delete file;
 }
 
 void MainWindow::on_radioButton_ascii_toggled(bool checked)
 {
     if (isSerialConnected && checked)
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
+
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (checked)
+        file->setValue("/RecvSetting/RecvCode", "ASCII");
+
+    delete file;
 }
 
 void MainWindow::on_radioButton_hex_toggled(bool checked)
@@ -492,6 +592,16 @@ void MainWindow::on_radioButton_hex_toggled(bool checked)
     {
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
     }
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (checked)
+        file->setValue("/RecvSetting/RecvCode", "HEX");
+
+    delete file;
 }
 
 void MainWindow::on_pushButton_retrans_clicked()
@@ -536,4 +646,139 @@ void MainWindow::on_comboBox_input_history_activated(const QString &arg1)
 {
     ui->plainTextEdit_input->clear();
     ui->plainTextEdit_input->appendPlainText(arg1);
+}
+
+void MainWindow::on_comboBox_baud_currentTextChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/PortSetting/BaudRate", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_comboBox_databit_currentTextChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/PortSetting/DataBit", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_comboBox_checkbit_currentTextChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/PortSetting/ParityBit", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_comboBox_stopbit_currentTextChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/PortSetting/StopBit", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_comboBox_flowctl_currentTextChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/PortSetting/FlowCtrl", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_checkBox_showSend_stateChanged(int arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (Qt::Checked == arg1)
+        file->setValue("/RecvSetting/ShowSend", "TRUE");
+    else
+        file->setValue("/RecvSetting/ShowSend", "FALSE");
+
+    delete file;
+}
+
+void MainWindow::on_radioButton_ascii_send_toggled(bool checked)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (checked)
+        file->setValue("/SendSetting/SendCode", "ASCII");
+
+    delete file;
+}
+
+void MainWindow::on_radioButton_hex_send_toggled(bool checked)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    if (checked)
+        file->setValue("/SendSetting/SendCode", "HEX");
+
+    delete file;
+}
+
+void MainWindow::on_spinBox_retrans_int_valueChanged(const QString &arg1)
+{
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+   file->setValue("/ResendSetting/Interval", arg1);
+
+    delete file;
+}
+
+void MainWindow::on_comboBox_baud_currentIndexChanged(int index)
+{
+    if (8 == index)
+    {
+        ui->comboBox_baud->setEditable(true);
+        ui->comboBox_baud->clearEditText();
+    }
+    else
+    {
+        ui->comboBox_baud->setEditable(false);
+    }
 }

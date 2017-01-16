@@ -23,6 +23,7 @@ public:
     ~MainWindow();
 
 private:
+    void readIniFile();
     void fillPortsInfo();
     void fillPortsParameters();
     void initSignalSlot();
@@ -35,7 +36,6 @@ private slots:
 
     void on_action_Language_triggered();
 
-    void customBaud(int);
     void readData();
 
     void on_action_clear_triggered();
@@ -57,6 +57,26 @@ private slots:
 
     void on_comboBox_input_history_activated(const QString &arg1);
 
+    void on_comboBox_baud_currentTextChanged(const QString &arg1);
+
+    void on_comboBox_databit_currentTextChanged(const QString &arg1);
+
+    void on_comboBox_checkbit_currentTextChanged(const QString &arg1);
+
+    void on_comboBox_stopbit_currentTextChanged(const QString &arg1);
+
+    void on_comboBox_flowctl_currentTextChanged(const QString &arg1);
+
+    void on_checkBox_showSend_stateChanged(int arg1);
+
+    void on_radioButton_ascii_send_toggled(bool checked);
+
+    void on_radioButton_hex_send_toggled(bool checked);
+
+    void on_spinBox_retrans_int_valueChanged(const QString &arg1);
+
+    void on_comboBox_baud_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
@@ -75,6 +95,7 @@ private:
     bool isShowSendData = false; //read from setting file
     bool isChinese = true;       //read from setting file
     bool isRetransing = false;
+    bool init_ok_flag = false;
 
     int rxBytesTotal = 0;
     int txBytesTotal = 0;
