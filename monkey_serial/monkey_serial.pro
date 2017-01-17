@@ -16,14 +16,17 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     qextserial/qextserialport.cpp \
-    qextserial/qextserialport_win.cpp
+    qextserial/qextserialport_win.cpp \
+    find.cpp
 
 HEADERS  += mainwindow.h \
     qextserial/qextserialport.h \
     qextserial/qextserialport_global.h \
-    qextserial/qextserialport_p.h
+    qextserial/qextserialport_p.h \
+    find.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    find.ui
 
 RESOURCES += \
     monkey.qrc

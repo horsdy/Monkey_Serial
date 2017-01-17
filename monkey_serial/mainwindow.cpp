@@ -1,8 +1,10 @@
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
 #include <QtDebug>
 #include <QtSerialPort>
 #include <QSettings>
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include <qnamespace.h>
+#include <QTextDocument>
 
 #define RED_TEXT_STYLESHEET   "color: rgb(170, 0, 0);font: 10pt \"微软雅黑\";"
 #define GREEN_TEXT_STYLESHEET "color: rgb(0, 85, 0); font: 10pt \"微软雅黑\";"
@@ -53,8 +55,6 @@ MainWindow::MainWindow(QWidget *parent) :
     pSpliter->setStretchFactor(1, 1);
 
     ui->horizontalLayout_2->addWidget(pSpliter);
-
-    //ui->plainTextEdit_recv->
 
     fillPortsInfo();
     //read port setting file
@@ -780,5 +780,70 @@ void MainWindow::on_comboBox_baud_currentIndexChanged(int index)
     else
     {
         ui->comboBox_baud->setEditable(false);
+    }
+}
+
+void MainWindow::on_actionFind_triggered()
+{
+    if (find)
+    {
+        find->clear();
+        QString text = this->ui->plainTextEdit_recv->textCursor().selectedText();
+        find->insert(text);
+
+        find->show();
+        find->raise();
+        find->activateWindow();
+    }
+    else
+    {
+        find = new Find(this);
+        connect(find, SIGNAL(find_str(QString&,uint)), this, SLOT(on_find_str(QString&,uint)) );
+
+        find->clear();
+        QString text = this->ui->plainTextEdit_recv->textCursor().selectedText();
+        find->insert(text);
+        find->show();
+    }
+}
+
+void MainWindow::on_find_str(QString &str, uint flags)
+{
+    QTextDocument::FindFlags options = (QTextDocument::FindFlags) flags;
+    ui->plainTextEdit_recv->find(str, options);
+    myFindStr = str;
+    if ( (options & QTextDocument::FindCaseSensitively) != 0)
+    {
+        is_case_sensitive = true;
+    }
+    else
+    {
+        is_case_sensitive = false;
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if (find == NULL || myFindStr.isEmpty())
+        return;
+
+    if (event->key() == Qt::Key_F3)
+    {
+        QTextDocument::FindFlags flags = QTextDocument::FindFlags();
+        if (is_case_sensitive)
+            flags = QTextDocument::FindCaseSensitively;
+
+        if (event->modifiers() == Qt::ShiftModifier)
+        {
+            //find previous
+            flags |= QTextDocument::FindBackward;
+            ui->plainTextEdit_recv->find(myFindStr, flags);
+        }
+        else
+        {
+            //find next
+            flags &= ~QTextDocument::FindBackward;
+            ui->plainTextEdit_recv->find(myFindStr, flags);
+        }
     }
 }

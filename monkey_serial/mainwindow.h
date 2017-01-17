@@ -10,6 +10,9 @@
 #include <QSplitter>
 #include <QTSQL>
 
+#include "find.h"
+#include "ui_find.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -28,6 +31,8 @@ private:
     void fillPortsParameters();
     void initSignalSlot();
     void appendContent(const QString &showBuf, bool isRecv = true);
+    void keyPressEvent(QKeyEvent *event);
+
 
 private slots:
     void on_action_port_triggered();
@@ -77,6 +82,10 @@ private slots:
 
     void on_comboBox_baud_currentIndexChanged(int index);
 
+    void on_actionFind_triggered();
+
+    void on_find_str(QString &str, uint flags);
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
@@ -88,6 +97,8 @@ private:
     QLabel *RXLabel;
     QLabel *TXLabel;
     QSqlDatabase db;
+    Find *find = NULL;
+    QString myFindStr;
 
     bool isSerialConnected = false;
     bool isLoging = false;       //read from setting file
@@ -96,6 +107,7 @@ private:
     bool isChinese = true;       //read from setting file
     bool isRetransing = false;
     bool init_ok_flag = false;
+    bool is_case_sensitive = false;
 
     int rxBytesTotal = 0;
     int txBytesTotal = 0;
