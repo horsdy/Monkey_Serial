@@ -1,6 +1,7 @@
 #include <QtDebug>
 #include <QtSerialPort>
 #include <QSettings>
+#include <QAbstractScrollArea>
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <qnamespace.h>
@@ -230,8 +231,10 @@ void MainWindow::appendContent(const QString &showBuf, bool isRecv)
     }
     else
     {
-        myShowBuf = ui->plainTextEdit_recv->document()->toPlainText() + myShowBuf;
-        ui->plainTextEdit_recv->setPlainText(myShowBuf);
+        ui->plainTextEdit_recv->moveCursor(QTextCursor::End);
+        ui->plainTextEdit_recv->insertPlainText(myShowBuf);
+        ui->plainTextEdit_recv->moveCursor(QTextCursor::End);
+        ui->plainTextEdit_recv->centerCursor();
     }
 
     //write to log file
@@ -800,6 +803,7 @@ void MainWindow::on_actionFind_triggered()
         find = new Find(this);
         connect(find, SIGNAL(find_str(QString&,uint)), this, SLOT(on_find_str(QString&,uint)) );
 
+        find->setWindowTitle("Find");
         find->clear();
         QString text = this->ui->plainTextEdit_recv->textCursor().selectedText();
         find->insert(text);
@@ -822,28 +826,29 @@ void MainWindow::on_find_str(QString &str, uint flags)
     }
 }
 
-void MainWindow::keyPressEvent(QKeyEvent *event)
+void MainWindow::on_actionFind_Next_triggered()
 {
     if (find == NULL || myFindStr.isEmpty())
         return;
 
-    if (event->key() == Qt::Key_F3)
-    {
-        QTextDocument::FindFlags flags = QTextDocument::FindFlags();
-        if (is_case_sensitive)
-            flags = QTextDocument::FindCaseSensitively;
+    QTextDocument::FindFlags flags = 0;
+    if (is_case_sensitive)
+        flags = QTextDocument::FindCaseSensitively;
 
-        if (event->modifiers() == Qt::ShiftModifier)
-        {
-            //find previous
-            flags |= QTextDocument::FindBackward;
-            ui->plainTextEdit_recv->find(myFindStr, flags);
-        }
-        else
-        {
-            //find next
-            flags &= ~QTextDocument::FindBackward;
-            ui->plainTextEdit_recv->find(myFindStr, flags);
-        }
-    }
+    //find next
+    ui->plainTextEdit_recv->find(myFindStr, flags);
+}
+
+void MainWindow::on_actionFind_Previous_triggered()
+{
+    if (find == NULL || myFindStr.isEmpty())
+        return;
+
+    QTextDocument::FindFlags flags = 0;
+    if (is_case_sensitive)
+        flags = QTextDocument::FindCaseSensitively;
+
+    //find previous
+    flags |= QTextDocument::FindBackward;
+    ui->plainTextEdit_recv->find(myFindStr, flags);
 }

@@ -31,7 +31,6 @@ private:
     void fillPortsParameters();
     void initSignalSlot();
     void appendContent(const QString &showBuf, bool isRecv = true);
-    void keyPressEvent(QKeyEvent *event);
 
 
 private slots:
@@ -85,6 +84,10 @@ private slots:
     void on_actionFind_triggered();
 
     void on_find_str(QString &str, uint flags);
+
+    void on_actionFind_Next_triggered();
+
+    void on_actionFind_Previous_triggered();
 
 private:
     Ui::MainWindow *ui;
