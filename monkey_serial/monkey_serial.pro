@@ -17,16 +17,19 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     qextserial/qextserialport.cpp \
     qextserial/qextserialport_win.cpp \
-    find.cpp
+    find.cpp \
+    settings.cpp
 
 HEADERS  += mainwindow.h \
     qextserial/qextserialport.h \
     qextserial/qextserialport_global.h \
     qextserial/qextserialport_p.h \
-    find.h
+    find.h \
+    settings.h
 
 FORMS    += mainwindow.ui \
-    find.ui
+    find.ui \
+    settings.ui
 
 RESOURCES += \
     monkey.qrc

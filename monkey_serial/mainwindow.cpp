@@ -2,14 +2,21 @@
 #include <QtSerialPort>
 #include <QSettings>
 #include <QAbstractScrollArea>
-#include "mainwindow.h"
-#include "ui_mainwindow.h"
+#include <QFontComboBox>
 #include <qnamespace.h>
 #include <QTextDocument>
+
+#include "mainwindow.h"
+#include "ui_mainwindow.h"
+#include "settings.h"
+#include "ui_settings.h"
 
 #define RED_TEXT_STYLESHEET   "color: rgb(170, 0, 0);font: 10pt \"微软雅黑\";"
 #define GREEN_TEXT_STYLESHEET "color: rgb(0, 85, 0); font: 10pt \"微软雅黑\";"
 #define INPUT_MAX 20
+
+#define FONT_STYLE "font: %1pt \"%2\";"
+#define DEFAULT_COLOR_PLAINTEXT "selection-background-color: rgb(0, 170, 255);selection-color: rgb(255, 255, 255);"
 
 #define INIT_FILE_PATH "./serial_setting.ini"
 
@@ -56,6 +63,8 @@ MainWindow::MainWindow(QWidget *parent) :
     pSpliter->setStretchFactor(1, 1);
 
     ui->horizontalLayout_2->addWidget(pSpliter);
+
+    //init tool bar
 
     fillPortsInfo();
     //read port setting file
@@ -121,6 +130,9 @@ void MainWindow::readIniFile()
     bool ShowTime = file->value("/RecvSetting/ShowTime").toBool();
     QString SendCode = file->value("/SendSetting/SendCode").toString();
     int Interval = file->value("/ResendSetting/Interval").toInt();
+    QString font = file->value("/UI/Font").toString();
+    QString size = file->value("/UI/FontSize").toString();
+    int lang = file->value("/UI/Lang").toInt();
 
     ui->comboBox_baud->setCurrentText(BaudRate);
     ui->comboBox_databit->setCurrentText(DataBit);
@@ -143,6 +155,13 @@ void MainWindow::readIniFile()
         ui->radioButton_hex_send->setChecked(true);
 
     ui->spinBox_retrans_int->setValue(Interval);
+
+    //set font of plaintext
+    ui->plainTextEdit_recv->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
+    ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
+
+    //set language
+
 
     delete file;
 }
@@ -851,4 +870,67 @@ void MainWindow::on_actionFind_Previous_triggered()
     //find previous
     flags |= QTextDocument::FindBackward;
     ui->plainTextEdit_recv->find(myFindStr, flags);
+}
+
+void MainWindow::on_action_font_triggered()
+{
+    if (setting)
+    {
+        QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+        if (NULL == file)
+            return;
+
+        QString font = file->value("/UI/Font").toString();
+        int size = file->value("/UI/FontSize").toInt();
+        int lang = file->value("/UI/Lang").toInt();
+        int font_idx = setting->font_list->indexOf(font);
+
+        setting->update_show(font_idx, size, lang);
+        setting->show();
+        setting->raise();
+        setting->activateWindow();
+    }
+    else
+    {
+        setting = new Settings(this);
+        connect(setting, SIGNAL(settings_change(uint, uint, uint)),
+                this, SLOT(on_settings_change(uint, uint, uint)));
+
+        QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+        if (NULL == file)
+            return;
+
+        QString font = file->value("/UI/Font").toString();
+        int size = file->value("/UI/FontSize").toInt();
+        int lang = file->value("/UI/Lang").toInt();
+        int font_idx = setting->font_list->indexOf(font);
+
+        setting->update_show(font_idx, size, lang);
+        setting->show();
+    }
+}
+
+void MainWindow::on_settings_change(uint font, uint size, uint lang)
+{
+    //set font of receiving text and sending text
+    QString fontstr = setting->font_list->at(font);
+
+    ui->plainTextEdit_recv->setStyleSheet(QString(FONT_STYLE).arg(size).arg(fontstr) + DEFAULT_COLOR_PLAINTEXT);
+    ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(fontstr) + DEFAULT_COLOR_PLAINTEXT);
+
+    //set language
+
+    //write to .ini file
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file|| FALSE == init_ok_flag)
+        return;
+
+    file->setValue("/UI/Font", fontstr);
+    file->setValue("/UI/FontSize", size);
+    file->setValue("/UI/Lang", lang);
+
+    delete file;
 }
