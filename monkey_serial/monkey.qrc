@@ -10,6 +10,7 @@
         <file>icon/english.png</file>
         <file>icon/find.png</file>
         <file>icon/serial-port.png</file>
+        <file>icon/language.png</file>
     </qresource>
     <qresource prefix="/css">
         <file>style/black.css</file>

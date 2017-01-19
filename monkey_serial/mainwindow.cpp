@@ -386,18 +386,7 @@ void MainWindow::on_action_Log_triggered()
 
 void MainWindow::on_action_Language_triggered()
 {
-    this->isChinese = !this->isChinese;
-
-    if (this->isChinese)
-    {
-        ui->action_Language->setIcon(QIcon(":/image/icon/english.png"));
-        ui->action_Language->setToolTip("Switch to English");
-    }
-    else
-    {
-        ui->action_Language->setIcon(QIcon(":/image/icon/chinese.png"));
-        ui->action_Language->setToolTip("切换到中文");
-    }
+    on_action_font_triggered();
 }
 
 void MainWindow::readData()

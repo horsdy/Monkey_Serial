@@ -482,13 +482,13 @@ selection-color: rgb(255, 255, 255);</string>
   <action name="action_Language">
    <property name="icon">
     <iconset resource="monkey.qrc">
-     <normaloff>:/image/icon/english.png</normaloff>:/image/icon/english.png</iconset>
+     <normaloff>:/image/icon/language.png</normaloff>:/image/icon/language.png</iconset>
    </property>
    <property name="text">
     <string>Language</string>
    </property>
    <property name="toolTip">
-    <string>Switch to English</string>
+    <string>Language</string>
    </property>
   </action>
   <action name="actionFind">
