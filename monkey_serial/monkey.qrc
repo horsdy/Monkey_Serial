@@ -13,4 +13,8 @@
         <file>icon/language.png</file>
         <file>icon/alipay.png</file>
     </qresource>
+    <qresource prefix="/resource">
+        <file>resource/main_widget_en.qm</file>
+        <file>resource/main_widget_zh.qm</file>
+    </qresource>
 </RCC>

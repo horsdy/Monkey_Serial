@@ -162,22 +162,23 @@ void MainWindow::readIniFile()
     ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
 
     //set language
-    QTranslator translator;
-    if (lang == Settings::MY_LANG_CHINESE)
-    {
-        bool b = translator.load("resource/main_widget_zh.qm");
-        qApp->installTranslator(&translator);
-        //this->Refresh();
-    }
-    else if (lang == Settings::MY_LANG_ENGLISH)
-    {
-        QString str("F:\Git_home\Monkey_Serial\monkey_serial\resourceresource\main_widget_en.qm");
-        QString path = QDir::toNativeSeparators(str);
-
-        bool b = translator.load(path);
-        qApp->installTranslator(&translator);
-        //this->Refresh();
-    }
+//    QTranslator translator;
+//    if (lang == Settings::MY_LANG_CHINESE)
+//    {
+//        if (translator.load(":/resource/resource/main_widget_zh.qm") )
+//        {
+//            qApp->installTranslator(&translator);
+//            //this->Refresh();
+//        }
+//    }
+//    else if (lang == Settings::MY_LANG_ENGLISH)
+//    {
+//        if (translator.load(":/resource/resource/main_widget_en.qm") )
+//        {
+//            qApp->installTranslator(&translator);
+//            //this->Refresh();
+//        }
+//    }
 
     delete file;
 }
