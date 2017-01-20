@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QLabel *voidLabel = new QLabel(this);
     ui->comboBox_input_history->setMaxCount(INPUT_MAX);
 
+    setWindowIcon(QIcon(":/image/icon/serial-port.png"));
     //status bar
     connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
     ui->statusBar->addWidget(connLabel, 1);
@@ -161,7 +162,22 @@ void MainWindow::readIniFile()
     ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
 
     //set language
+    QTranslator translator;
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        bool b = translator.load("resource/main_widget_zh.qm");
+        qApp->installTranslator(&translator);
+        //this->Refresh();
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        QString str("F:\Git_home\Monkey_Serial\monkey_serial\resourceresource\main_widget_en.qm");
+        QString path = QDir::toNativeSeparators(str);
 
+        bool b = translator.load(path);
+        qApp->installTranslator(&translator);
+        //this->Refresh();
+    }
 
     delete file;
 }
@@ -298,27 +314,28 @@ void MainWindow::on_action_port_triggered()
             //open ok
             this->isSerialConnected = true;
             ui->action_port->setIcon(QIcon(":/image/icon/stop.png"));
-            ui->action_port->setToolTip("断开连接");
+            ui->action_port->setToolTip(tr("断开连接"));
             ui->groupBox->setEnabled(false);
             connLabel->setStyleSheet(GREEN_TEXT_STYLESHEET);
             connLabel->setText(" Connected");
         } else {
             this->isSerialConnected = false;
             ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
-            ui->action_port->setToolTip("连接");
+            ui->action_port->setToolTip(tr("打开连接"));
 
             ui->groupBox->setEnabled(true);
             isRetransing = false;
             retransTimer->stop();
 
             ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-            ui->action_Log->setToolTip("启动日志");
+            ui->action_Log->setToolTip(tr("启动日志") );
             connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
             connLabel->setText(" Disconnected");
             logfile_path.clear();
             //Close File
             logFile->close();
             serial->close();
+            isLoging = false;
 
             QMessageBox::critical(this, tr("Error"), serial->errorString());
         }
@@ -327,14 +344,14 @@ void MainWindow::on_action_port_triggered()
     {
         this->isSerialConnected = false;
         ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
-        ui->action_port->setToolTip("连接");
+        ui->action_port->setToolTip(tr("打开连接") );
 
         ui->groupBox->setEnabled(true);
         isRetransing = false;
         retransTimer->stop();
 
         ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-        ui->action_Log->setToolTip("启动日志");
+        ui->action_Log->setToolTip(tr("启动日志") );
         connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
         connLabel->setText(" Disconnected");
         logfile_path.clear();
@@ -366,7 +383,7 @@ void MainWindow::on_action_Log_triggered()
             QString filename;
 
             ui->action_Log->setIcon(QIcon(":/image/icon/work_log_off.png"));
-            ui->action_Log->setToolTip("停止日志");
+            ui->action_Log->setToolTip(tr("停止日志") );
             filename = QDateTime::currentDateTime().toString("Log_yyyyMMdd_hhmmss");
             filename.append(".txt");
             QDir::setCurrent(logfile_path);
@@ -377,7 +394,7 @@ void MainWindow::on_action_Log_triggered()
     else
     {
         ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-        ui->action_Log->setToolTip("启动日志");
+        ui->action_Log->setToolTip(tr("启动日志"));
         logfile_path.clear();
         //Close File
         logFile->close();
@@ -639,12 +656,12 @@ void MainWindow::on_pushButton_retrans_clicked()
         retransTimer->setInterval(ui->spinBox_retrans_int->value());
         retransTimer->setSingleShot(false);
         retransTimer->start();
-        ui->pushButton_retrans->setText("停止");
+        ui->pushButton_retrans->setText(tr("停止"));
     }
     else
     {
         retransTimer->stop();
-        ui->pushButton_retrans->setText("重复发送");
+        ui->pushButton_retrans->setText(tr("重复发送") );
     }
 }
 
@@ -922,4 +939,19 @@ void MainWindow::on_settings_change(uint font, uint size, uint lang)
     file->setValue("/UI/Lang", lang);
 
     delete file;
+}
+
+void MainWindow::on_action_about_triggered()
+{
+   if (about)
+   {
+       about->show();
+       about->raise();
+       about->activateWindow();
+   }
+   else
+   {
+       about = new About(this);
+       about->show();
+   }
 }

@@ -12,45 +12,32 @@ QT += serialport
 TARGET = monkey_serial
 TEMPLATE = app
 
+TRANSLATIONS += resource/main_widget_zh.ts  \
+                resource/main_widget_en.ts
 
 SOURCES += main.cpp\
         mainwindow.cpp \
     qextserial/qextserialport.cpp \
     qextserial/qextserialport_win.cpp \
     find.cpp \
-    settings.cpp
+    settings.cpp \
+    about.cpp
 
 HEADERS  += mainwindow.h \
     qextserial/qextserialport.h \
     qextserial/qextserialport_global.h \
     qextserial/qextserialport_p.h \
     find.h \
-    settings.h
+    settings.h \
+    about.h
 
 FORMS    += mainwindow.ui \
     find.ui \
-    settings.ui
+    settings.ui \
+    about.ui
 
 RESOURCES += \
     monkey.qrc
 
 DISTFILES += \
-    qextserial/LICENSE \
-    style/fontawesome-webfont.ttf \
-    style/qt_zh_CN.qm \
-    style/add-line_horizontal.png \
-    style/add-line_vertical.png \
-    style/array_down.png \
-    style/checkbox_checked.png \
-    style/checkbox_unchecked.png \
-    style/error.png \
-    style/Font Awesome Cheatsheet.png \
-    style/info.png \
-    style/question.png \
-    style/radio_normal.png \
-    style/radio_selected.png \
-    style/sub-line_horizontal.png \
-    style/sub-line_vertical.png \
-    style/blue.css \
-    style/gray.css \
-    style/navy.css
+    qextserial/LICENSE

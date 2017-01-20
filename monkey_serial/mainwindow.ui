@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Monkey Serial</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <property name="mouseTracking">
@@ -400,6 +400,8 @@ selection-color: rgb(255, 255, 255);</string>
     <addaction name="actionFind"/>
     <addaction name="actionFind_Next"/>
     <addaction name="actionFind_Previous"/>
+    <addaction name="action_font"/>
+    <addaction name="action_Language"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_tool"/>
@@ -497,7 +499,7 @@ selection-color: rgb(255, 255, 255);</string>
      <normaloff>:/image/icon/find.png</normaloff>:/image/icon/find.png</iconset>
    </property>
    <property name="text">
-    <string>Find</string>
+    <string>查找</string>
    </property>
    <property name="toolTip">
     <string>查找 (CTRL+F)</string>
@@ -508,7 +510,7 @@ selection-color: rgb(255, 255, 255);</string>
   </action>
   <action name="actionFind_Next">
    <property name="text">
-    <string>Find Next</string>
+    <string>查找下一个</string>
    </property>
    <property name="shortcut">
     <string>F3</string>
@@ -516,7 +518,7 @@ selection-color: rgb(255, 255, 255);</string>
   </action>
   <action name="actionFind_Previous">
    <property name="text">
-    <string>Find Previous</string>
+    <string>查找上一个</string>
    </property>
    <property name="shortcut">
     <string>Shift+F3</string>

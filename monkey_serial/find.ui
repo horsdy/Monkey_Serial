@@ -27,7 +27,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Content:</string>
+        <string>内容：</string>
        </property>
       </widget>
      </item>
@@ -37,7 +37,7 @@
      <item>
       <widget class="QPushButton" name="pushButton">
        <property name="text">
-        <string>Find</string>
+        <string>查找</string>
        </property>
       </widget>
      </item>
@@ -48,21 +48,21 @@
      <item>
       <widget class="QCheckBox" name="checkBox">
        <property name="text">
-        <string>Case-Sensitive</string>
+        <string>区分大小写</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QRadioButton" name="radioButton_previous">
        <property name="text">
-        <string>Find Previous</string>
+        <string>查找前一个</string>
        </property>
       </widget>
      </item>
      <item>
       <widget class="QRadioButton" name="radioButton_next">
        <property name="text">
-        <string>Find Next</string>
+        <string>查找后一个</string>
        </property>
        <property name="checked">
         <bool>true</bool>
@@ -72,7 +72,7 @@
      <item>
       <widget class="QPushButton" name="pushButton_2">
        <property name="text">
-        <string>Cancel</string>
+        <string>取消</string>
        </property>
       </widget>
      </item>

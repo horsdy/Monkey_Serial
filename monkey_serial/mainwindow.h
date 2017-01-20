@@ -14,6 +14,8 @@
 #include "ui_find.h"
 #include "settings.h"
 #include "ui_settings.h"
+#include "about.h"
+#include "ui_about.h"
 
 namespace Ui {
 class MainWindow;
@@ -95,6 +97,8 @@ private slots:
 
     void on_settings_change(uint font, uint size, uint lang);
 
+    void on_action_about_triggered();
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
@@ -109,6 +113,7 @@ private:
     Find *find = NULL;
     QString myFindStr;
     Settings *setting = NULL;
+    About *about = NULL;
 
     bool isSerialConnected = false;
     bool isLoging = false;       //read from setting file
