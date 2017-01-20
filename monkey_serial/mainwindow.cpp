@@ -161,25 +161,6 @@ void MainWindow::readIniFile()
     ui->plainTextEdit_recv->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
     ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
 
-    //set language
-//    QTranslator translator;
-//    if (lang == Settings::MY_LANG_CHINESE)
-//    {
-//        if (translator.load(":/resource/resource/main_widget_zh.qm") )
-//        {
-//            qApp->installTranslator(&translator);
-//            //this->Refresh();
-//        }
-//    }
-//    else if (lang == Settings::MY_LANG_ENGLISH)
-//    {
-//        if (translator.load(":/resource/resource/main_widget_en.qm") )
-//        {
-//            qApp->installTranslator(&translator);
-//            //this->Refresh();
-//        }
-//    }
-
     delete file;
 }
 

@@ -4,7 +4,7 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
+
 
 
     QTranslator translator;
@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     if (translator.load(QString(":/resource/resource/main_widget_en.qm")) )
         a.installTranslator(&translator);
 
-
+    MainWindow w;
     w.show();
     return a.exec();
 }

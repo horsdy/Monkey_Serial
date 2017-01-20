@@ -39,13 +39,13 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>220</width>
+          <width>260</width>
           <height>0</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>220</width>
+          <width>500</width>
           <height>16777215</height>
          </size>
         </property>
@@ -93,7 +93,7 @@
            </property>
            <property name="maximumSize">
             <size>
-             <width>140</width>
+             <width>150</width>
              <height>16777215</height>
             </size>
            </property>
@@ -145,7 +145,7 @@
         </property>
         <property name="minimumSize">
          <size>
-          <width>220</width>
+          <width>260</width>
           <height>0</height>
          </size>
         </property>
@@ -204,7 +204,7 @@
        <widget class="QGroupBox" name="groupBox_3">
         <property name="minimumSize">
          <size>
-          <width>220</width>
+          <width>260</width>
           <height>0</height>
          </size>
         </property>
@@ -292,7 +292,7 @@
        <widget class="QPlainTextEdit" name="plainTextEdit_recv">
         <property name="minimumSize">
          <size>
-          <width>550</width>
+          <width>600</width>
           <height>350</height>
          </size>
         </property>
