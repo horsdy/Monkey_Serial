@@ -231,7 +231,8 @@ void MainWindow::readIniFile()
         int width = desktop->width();
         int height = desktop->height();
 
-        move((width - this->width())/2, (height - this->height())/2);
+        //move((width - this->width())/2, (height - this->height())/2);
+        setGeometry((width - this->width())/2, (height - this->height())/2, this->width(), this->height());
     }
     delete file;
 }
