@@ -229,8 +229,8 @@ void MainWindow::readIniFile()
     {
         //move to certal
         QDesktopWidget *desktop = QApplication::desktop();
-        int width = desktop->availableGeometry(this).width();
-        int height = desktop->availableGeometry(this).height();
+        int width = desktop->width();
+        int height = desktop->height();
 
         move((width - this->width())/2, (height - this->height())/2);
     }

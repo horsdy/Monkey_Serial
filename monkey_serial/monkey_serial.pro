@@ -12,6 +12,7 @@ QT += serialport
 TARGET = monkey_serial
 TEMPLATE = app
 
+RC_FILE = res.rc
 TRANSLATIONS += resource/main_widget_zh.ts  \
                 resource/main_widget_en.ts
 
