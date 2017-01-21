@@ -5,6 +5,9 @@
 #include <QFontComboBox>
 #include <qnamespace.h>
 #include <QTextDocument>
+#include <QRect>
+#include <QDesktopWidget>
+#include <QWidget>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -35,6 +38,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QLabel *voidLabel = new QLabel(this);
     ui->comboBox_input_history->setMaxCount(INPUT_MAX);
 
+    //window icon
     setWindowIcon(QIcon(":/image/icon/serial-port.png"));
     //status bar
     connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
@@ -112,6 +116,31 @@ MainWindow::~MainWindow()
     delete serial;
 }
 
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    //write position size to file
+    int x = this->geometry().x();
+    int y = this->geometry().y();
+    int width = this->geometry().width();
+    int height = this->geometry().height();
+
+    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    if (file)
+    {
+        file->setValue("/UI/X", x);
+        file->setValue("/UI/Y", y);
+        file->setValue("/UI/Width", width);
+        file->setValue("/UI/Height", height);
+
+        if (windowState() & Qt::WindowMaximized)
+            file->setValue("UI/WindowMax", 1);
+        else
+            file->setValue("UI/WindowMax", 0);
+    }
+
+    QMainWindow::closeEvent(event);
+}
+
 //Read setting file about port, show
 void MainWindow::readIniFile()
 {
@@ -134,6 +163,11 @@ void MainWindow::readIniFile()
     QString font = file->value("/UI/Font").toString();
     QString size = file->value("/UI/FontSize").toString();
     int lang = file->value("/UI/Lang").toInt();
+    int x = file->value("/UI/X").toInt();
+    int y = file->value("/UI/Y").toInt();
+    int width = file->value("/UI/Width").toInt();
+    int height = file->value("/UI/Height").toInt();
+    int is_max = file->value("/UI/WindowMax").toInt();
 
     ui->comboBox_baud->setCurrentText(BaudRate);
     ui->comboBox_databit->setCurrentText(DataBit);
@@ -161,6 +195,45 @@ void MainWindow::readIniFile()
     ui->plainTextEdit_recv->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
     ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(font) + DEFAULT_COLOR_PLAINTEXT);
 
+    //set language
+    QTranslator translator;
+    QString lang_path("");
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        lang_path = ":/resource/resource/main_widget_zh.qm";
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        lang_path = ":/resource/resource/main_widget_en.qm";
+    }
+
+    if (translator.load(lang_path) )
+    {
+        qApp->installTranslator(&translator);
+        ui->retranslateUi(this);
+    }
+
+    if (is_max)
+    {
+        Qt::WindowStates state = windowState();
+        state |= Qt::WindowMaximized;
+        setWindowState(state);
+    }
+    else if (width > 0 && height > 0)
+    {
+        //move to last position
+        move(x, y);
+        resize(width, height);
+    }
+    else
+    {
+        //move to certal
+        QDesktopWidget *desktop = QApplication::desktop();
+        int width = desktop->availableGeometry(this).width();
+        int height = desktop->availableGeometry(this).height();
+
+        move((width - this->width())/2, (height - this->height())/2);
+    }
     delete file;
 }
 
@@ -269,6 +342,7 @@ void MainWindow::on_action_port_triggered()
 {
     if (!this->isSerialConnected)
     {
+        QString port = portList.at(ui->comboBox_port->currentIndex());
         BaudRateType baud = static_cast<BaudRateType>(ui->comboBox_baud->currentText().toInt());
         DataBitsType dataBits = static_cast<DataBitsType>(
                     ui->comboBox_databit->itemData(ui->comboBox_databit->currentIndex()).toInt());
@@ -285,7 +359,13 @@ void MainWindow::on_action_port_triggered()
             return;
         }
 
-        serial->setPortName( portList.at(ui->comboBox_port->currentIndex()) );
+        if ( port.isEmpty() )
+        {
+            QMessageBox::critical(this, tr("Error"), "Port can't be NULL");
+            return;
+        }
+
+        serial->setPortName( port );
         serial->setBaudRate( baud);
         serial->setDataBits(dataBits);
         serial->setParity(parity);
@@ -649,7 +729,7 @@ void MainWindow::on_pushButton_retrans_clicked()
 
 void MainWindow::on_action_exit_triggered()
 {
-    QApplication::exit();
+    close();
 }
 
 void MainWindow::on_comboBox_input_history_activated(const QString &arg1)
@@ -909,6 +989,23 @@ void MainWindow::on_settings_change(uint font, uint size, uint lang)
     ui->plainTextEdit_input->setStyleSheet(QString(FONT_STYLE).arg(size).arg(fontstr) + DEFAULT_COLOR_PLAINTEXT);
 
     //set language
+    QTranslator translator;
+    QString lang_path("");
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        lang_path = ":/resource/resource/main_widget_zh.qm";
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        lang_path = ":/resource/resource/main_widget_en.qm";
+    }
+
+    if (translator.load(lang_path) )
+    {
+        qApp->installTranslator(&translator);
+        ui->retranslateUi(this);
+        this->update();
+    }
 
     //write to .ini file
     QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);

@@ -35,6 +35,7 @@ private:
     void fillPortsParameters();
     void initSignalSlot();
     void appendContent(const QString &showBuf, bool isRecv = true);
+    void closeEvent(QCloseEvent *event);
 
 
 private slots:

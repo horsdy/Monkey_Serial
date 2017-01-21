@@ -1,0 +1,14 @@
+INPUT(
+./release\main.o
+./release\mainwindow.o
+./release\qextserialport.o
+./release\qextserialport_win.o
+./release\find.o
+./release\settings.o
+./release\about.o
+./release\qrc_monkey.o
+./release\moc_mainwindow.o
+./release\moc_find.o
+./release\moc_settings.o
+./release\moc_about.o
+);
