@@ -222,8 +222,7 @@ void MainWindow::readIniFile()
     else if (width > 0 && height > 0)
     {
         //move to last position
-        move(x, y);
-        resize(width, height);
+        setGeometry(x, y, width, height);
     }
     else
     {
@@ -342,7 +341,15 @@ void MainWindow::on_action_port_triggered()
 {
     if (!this->isSerialConnected)
     {
-        QString port = portList.at(ui->comboBox_port->currentIndex());
+        QString port("");
+        if (ui->comboBox_port->currentIndex() >= 0)
+            port = portList.at(ui->comboBox_port->currentIndex());
+        else
+        {
+            QMessageBox::critical(this, tr("Error"), "Port can't be NULL");
+            return;
+        }
+
         BaudRateType baud = static_cast<BaudRateType>(ui->comboBox_baud->currentText().toInt());
         DataBitsType dataBits = static_cast<DataBitsType>(
                     ui->comboBox_databit->itemData(ui->comboBox_databit->currentIndex()).toInt());
@@ -356,12 +363,6 @@ void MainWindow::on_action_port_triggered()
         if (baud == 0)
         {
             QMessageBox::critical(this, tr("Error"), "Baud rate can't be 0");
-            return;
-        }
-
-        if ( port.isEmpty() )
-        {
-            QMessageBox::critical(this, tr("Error"), "Port can't be NULL");
             return;
         }
 
