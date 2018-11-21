@@ -164,6 +164,16 @@ void MainWindow::closeEvent(QCloseEvent *event)
     QMainWindow::closeEvent(event);
 }
 
+void MainWindow::MyDelayMs(int ms)
+{
+    QTime reachTime = QTime::currentTime().addMSecs(ms);
+
+    while (QTime::currentTime() < reachTime)
+    {
+
+    }
+}
+
 //Read setting file about port, show
 void MainWindow::readIniFile()
 {
@@ -502,6 +512,9 @@ void MainWindow::on_action_Language_triggered()
 void MainWindow::readData()
 {
     QByteArray data = serial->readAll();
+    QThread::msleep(80);
+    data = data + serial->readAll();
+
     QString showBuf;
     QString asciiBuf = QString(data);
     QString hexstr;

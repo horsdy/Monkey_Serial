@@ -29,6 +29,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void MyDelayMs(int ms);
+
 private:
     void readIniFile();
     void fillPortsInfo();
