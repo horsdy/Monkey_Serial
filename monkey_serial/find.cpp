@@ -2,6 +2,9 @@
 
 #include "find.h"
 #include "ui_find.h"
+#include "settings.h"
+#include <QTranslator>
+#include <qDebug>
 
 Find::Find(QWidget *parent) :
     QDialog(parent),
@@ -49,3 +52,31 @@ void Find::on_pushButton_clicked()
     //send to MainWindow to find
     emit find_str(str, flags);
 }
+
+void Find::update_show(uint font, uint size, uint lang)
+{
+    //set language
+    QTranslator translator;
+    QString lang_path("");
+
+    qDebug()<< "Find lang" << lang;
+
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        lang_path = ":/resource/resource/main_widget_zh.qm";
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        lang_path = ":/resource/resource/main_widget_en.qm";
+    }
+
+    if (translator.load(lang_path) )
+    {
+        qApp->installTranslator(&translator);
+        ui->retranslateUi(this);
+        this->update();
+    }
+}
+
+
+

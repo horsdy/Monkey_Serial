@@ -1,5 +1,7 @@
 #include "settings.h"
 #include "ui_settings.h"
+#include <QTranslator>
+#include <qDebug>
 
 Settings::Settings(QWidget *parent) :
     QDialog(parent),
@@ -39,6 +41,27 @@ void Settings::on_buttonBox_2_accepted()
     size = ui->comboBox_fontsize->currentText().toInt();
     lang = ui->comboBox_lang->currentIndex();
 
+    //设置显示语言
+    //set language
+    QTranslator translator;
+    QString lang_path("");
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        lang_path = ":/resource/resource/main_widget_zh.qm";
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        lang_path = ":/resource/resource/main_widget_en.qm";
+    }
+
+    if (translator.load(lang_path) )
+    {
+        //更新窗口
+        qApp->installTranslator(&translator);
+        ui->retranslateUi(this);
+        this->update();
+    }
+
     emit settings_change(font, size, lang);
     this->close();
 }
@@ -53,6 +76,28 @@ void Settings::update_show(uint font, uint size, uint lang)
     ui->comboBox_font->setCurrentIndex(font);
     ui->comboBox_fontsize->setCurrentText(QString::number(size) );
     ui->comboBox_lang->setCurrentIndex(lang);
+
+    //set language
+    QTranslator translator;
+    QString lang_path("");
+
+    qDebug()<< "setting lang" << lang;
+
+    if (lang == Settings::MY_LANG_CHINESE)
+    {
+        lang_path = ":/resource/resource/main_widget_zh.qm";
+    }
+    else if (lang == Settings::MY_LANG_ENGLISH)
+    {
+        lang_path = ":/resource/resource/main_widget_en.qm";
+    }
+
+    if (translator.load(lang_path) )
+    {
+        qApp->installTranslator(&translator);
+        ui->retranslateUi(this);
+        this->update();
+    }
 }
 
 

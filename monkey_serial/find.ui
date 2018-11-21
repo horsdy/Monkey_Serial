@@ -16,7 +16,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string/>
+   <string>Find</string>
   </property>
   <property name="modal">
    <bool>false</bool>

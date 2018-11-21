@@ -18,6 +18,7 @@ public:
 public:
     void insert(QString &text);
     void clear();
+    void update_show(uint font, uint size, uint lang);
 
 signals:
     void find_str(QString &str, uint flag);

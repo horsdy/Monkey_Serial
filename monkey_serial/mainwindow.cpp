@@ -21,13 +21,17 @@
 #define FONT_STYLE "font: %1pt \"%2\";"
 #define DEFAULT_COLOR_PLAINTEXT "selection-background-color: rgb(0, 170, 255);selection-color: rgb(255, 255, 255);"
 
-#define INIT_FILE_PATH "./serial_setting.ini"
+#define INIT_FILE_PATH "/serial_setting.ini"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    //获取软件当前路径
+    home_dir = qApp->applicationDirPath();
+    qDebug() << "home dir" << home_dir;
 
     serial = new QextSerialPort( );
     retransTimer = new QTimer(this);
@@ -80,12 +84,28 @@ MainWindow::MainWindow(QWidget *parent) :
     //init db
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setHostName("localhost"); //设置数据库主机名
-    db.setDatabaseName("InputHistory.db"); //设置数据库名
+    db.setDatabaseName(home_dir + "/InputHistory.db"); //设置数据库名
+    qDebug() << "Database path" << home_dir + "/InputHistory.db";
+
     if (db.open())
     {
-        qDebug() << "Database open OK";
-        //read input history
         QSqlQuery sqlQuery;
+
+        qDebug() << "Database open OK";
+
+        //清空数据库
+//        sqlQuery.prepare("delete from input");
+//        if (sqlQuery.exec())
+//        {
+//            qDebug() << "delete from DB OK.";
+//        }
+//        else
+//        {
+//            qDebug() << "delete DB Fail: " << sqlQuery.lastError();
+//        }
+
+        //read input history
+
         sqlQuery.prepare("select data from input");
         if (sqlQuery.exec())
         {
@@ -98,7 +118,10 @@ MainWindow::MainWindow(QWidget *parent) :
             }
         }
         else
+        {
             qDebug() << "select DB Fail: " << sqlQuery.lastError();
+        }
+
     }
     else
     {
@@ -124,7 +147,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
     int width = this->geometry().width();
     int height = this->geometry().height();
 
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
     if (file)
     {
         file->setValue("/UI/X", x);
@@ -144,7 +167,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 //Read setting file about port, show
 void MainWindow::readIniFile()
 {
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file)
         return;
@@ -198,6 +221,9 @@ void MainWindow::readIniFile()
     //set language
     QTranslator translator;
     QString lang_path("");
+
+    qDebug()<< "lang" << lang;
+
     if (lang == Settings::MY_LANG_CHINESE)
     {
         lang_path = ":/resource/resource/main_widget_zh.qm";
@@ -211,6 +237,7 @@ void MainWindow::readIniFile()
     {
         qApp->installTranslator(&translator);
         ui->retranslateUi(this);
+        //this->update();
     }
 
     if (is_max)
@@ -305,11 +332,11 @@ void MainWindow::appendContent(const QString &showBuf, bool isRecv)
     {
         if (isRecv)
         {
-            myShowBuf = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss.zzz @R] ");
+            myShowBuf = QDateTime::currentDateTime().toString("[hh:mm:ss.zzz-RX] ");
         }
         else
         {
-            myShowBuf = QDateTime::currentDateTime().toString("[yyyy-MM-dd hh:mm:ss.zzz @T] ");
+            myShowBuf = QDateTime::currentDateTime().toString("[hh:mm:ss.zzz-TX] ");
         }
     }
 
@@ -401,7 +428,8 @@ void MainWindow::on_action_port_triggered()
             serial->close();
             isLoging = false;
 
-            QMessageBox::critical(this, tr("Error"), serial->errorString());
+            //QMessageBox::critical(this, tr("Error"), serial->errorString());
+            QMessageBox::critical(this, tr("Error"), tr("Open Fail"));
         }
     }
     else
@@ -470,6 +498,7 @@ void MainWindow::on_action_Language_triggered()
     on_action_font_triggered();
 }
 
+//串口读到数据
 void MainWindow::readData()
 {
     QByteArray data = serial->readAll();
@@ -484,10 +513,12 @@ void MainWindow::readData()
     else if (ui->radioButton_hex->isChecked())
     {
         int i = 0;
+        UINT8 num = 0;
 
         for (i = 0; i < data.size(); i++)
         {
-            hexstr += QString("%1 ").arg(data.at(i), 2, 16);
+            num = data.at(i);
+            hexstr += (QString("%1 ").arg(num, 2, 16, QChar('0')) ).toUpper();
         }
         showBuf = hexstr;
     }
@@ -525,9 +556,9 @@ void MainWindow::on_pushButton_send_clicked()
             //remove all non-hex char
             for (i = 0; i < data.size(); )
             {
-                if (data.at(i) >= '0' && data.at(i) <= '9' ||
-                    data.at(i) >= 'a' && data.at(i) <= 'f' ||
-                    data.at(i) >= 'A' && data.at(i) <= 'F' )
+                if ( (data.at(i) >= '0' && data.at(i) <= '9') ||
+                    (data.at(i) >= 'a' && data.at(i) <= 'f') ||
+                    (data.at(i) >= 'A' && data.at(i) <= 'F') )
                 {
                     i++;
                 }
@@ -553,10 +584,12 @@ void MainWindow::on_pushButton_send_clicked()
             {
                 QString str;
                 int i = 0;
+                UINT8 num = 0;
 
                 for (i = 0; i < mydata.size(); i++)
                 {
-                    str += QString("%1 ").arg(mydata.at(i), 2, 16);
+                    num = mydata.at(i);
+                    str += (QString("%1 ").arg(num, 2, 16, QChar('0')) ).toUpper();
                 }
                 appendContent(str, false);
             }
@@ -595,8 +628,9 @@ void MainWindow::on_pushButton_send_clicked()
             sqlQuery.addBindValue(data);
             if (sqlQuery.exec())
                 qDebug() << "insert DB OK.";
-            else
+            else {
                 qDebug() << "insert DB Fail: " << sqlQuery.lastError();
+            }
 
             ui->comboBox_input_history->insertItem(0, QString(data));
             ui->comboBox_input_history->setCurrentText(QString(data));
@@ -628,7 +662,7 @@ void MainWindow::on_checkBox_showTime_stateChanged(int arg1)
     }
 
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file || FALSE == init_ok_flag)
         return;
@@ -648,7 +682,7 @@ void MainWindow::on_checkBox_newLine_stateChanged(int arg1)
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
     }
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -667,7 +701,7 @@ void MainWindow::on_radioButton_ascii_toggled(bool checked)
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
 
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -685,7 +719,7 @@ void MainWindow::on_radioButton_hex_toggled(bool checked)
         ui->plainTextEdit_recv->appendPlainText(""); //turn to new line
     }
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -743,7 +777,7 @@ void MainWindow::on_comboBox_input_history_activated(const QString &arg1)
 void MainWindow::on_comboBox_baud_currentTextChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -756,7 +790,7 @@ void MainWindow::on_comboBox_baud_currentTextChanged(const QString &arg1)
 void MainWindow::on_comboBox_databit_currentTextChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -769,7 +803,7 @@ void MainWindow::on_comboBox_databit_currentTextChanged(const QString &arg1)
 void MainWindow::on_comboBox_checkbit_currentTextChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -782,7 +816,7 @@ void MainWindow::on_comboBox_checkbit_currentTextChanged(const QString &arg1)
 void MainWindow::on_comboBox_stopbit_currentTextChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -795,7 +829,7 @@ void MainWindow::on_comboBox_stopbit_currentTextChanged(const QString &arg1)
 void MainWindow::on_comboBox_flowctl_currentTextChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -808,7 +842,7 @@ void MainWindow::on_comboBox_flowctl_currentTextChanged(const QString &arg1)
 void MainWindow::on_checkBox_showSend_stateChanged(int arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -824,7 +858,7 @@ void MainWindow::on_checkBox_showSend_stateChanged(int arg1)
 void MainWindow::on_radioButton_ascii_send_toggled(bool checked)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -838,7 +872,7 @@ void MainWindow::on_radioButton_ascii_send_toggled(bool checked)
 void MainWindow::on_radioButton_hex_send_toggled(bool checked)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -852,7 +886,7 @@ void MainWindow::on_radioButton_hex_send_toggled(bool checked)
 void MainWindow::on_spinBox_retrans_int_valueChanged(const QString &arg1)
 {
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;
@@ -877,12 +911,20 @@ void MainWindow::on_comboBox_baud_currentIndexChanged(int index)
 
 void MainWindow::on_actionFind_triggered()
 {
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
+
+    if (NULL == file)
+        return;
+
+    int lang = file->value("/UI/Lang").toInt();
+
     if (find)
     {
         find->clear();
         QString text = this->ui->plainTextEdit_recv->textCursor().selectedText();
         find->insert(text);
 
+        find->update_show(0, 0, lang);
         find->show();
         find->raise();
         find->activateWindow();
@@ -895,6 +937,8 @@ void MainWindow::on_actionFind_triggered()
         find->setWindowTitle("Find");
         find->clear();
         QString text = this->ui->plainTextEdit_recv->textCursor().selectedText();
+
+        find->update_show(0, 0, lang);
         find->insert(text);
         find->show();
     }
@@ -946,7 +990,7 @@ void MainWindow::on_action_font_triggered()
 {
     if (setting)
     {
-        QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+        QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
         if (NULL == file)
             return;
@@ -967,7 +1011,7 @@ void MainWindow::on_action_font_triggered()
         connect(setting, SIGNAL(settings_change(uint, uint, uint)),
                 this, SLOT(on_settings_change(uint, uint, uint)));
 
-        QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+        QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
         if (NULL == file)
             return;
@@ -1004,13 +1048,14 @@ void MainWindow::on_settings_change(uint font, uint size, uint lang)
 
     if (translator.load(lang_path) )
     {
+        //更新主窗口
         qApp->installTranslator(&translator);
         ui->retranslateUi(this);
         this->update();
     }
 
     //write to .ini file
-    QSettings *file = new QSettings(INIT_FILE_PATH, QSettings::IniFormat);
+    QSettings *file = new QSettings(home_dir + INIT_FILE_PATH, QSettings::IniFormat);
 
     if (NULL == file|| FALSE == init_ok_flag)
         return;

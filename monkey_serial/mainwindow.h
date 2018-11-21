@@ -106,6 +106,7 @@ private:
     QStringList portList;
     QTimer *retransTimer;
     QString logfile_path;
+    QString home_dir;
     QFile *logFile;
     QLabel *connLabel;
     QLabel *RXLabel;
