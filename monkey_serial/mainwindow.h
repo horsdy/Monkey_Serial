@@ -30,6 +30,7 @@ public:
     ~MainWindow();
 
     void MyDelayMs(int ms);
+    void closePort();
 
 private:
     void readIniFile();
@@ -102,11 +103,15 @@ private slots:
 
     void on_action_about_triggered();
 
+    void on_detect_com();
+
 private:
     Ui::MainWindow *ui;
     QextSerialPort *serial;
     QStringList portList;
+    QString currentPort;
     QTimer *retransTimer;
+    QTimer *detectComTimer;
     QString logfile_path;
     QString home_dir;
     QFile *logFile;

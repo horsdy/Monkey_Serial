@@ -35,6 +35,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     serial = new QextSerialPort( );
     retransTimer = new QTimer(this);
+    detectComTimer = new QTimer(this);
     logFile = new QFile(this);
     connLabel = new QLabel(" Disconnected", this);
     RXLabel = new QLabel("RX : 0 Bytes", this);
@@ -128,6 +129,11 @@ MainWindow::MainWindow(QWidget *parent) :
         qDebug() << "Database open Fail: " << db.lastError();
     }
 
+    //开启一个定时器,定时起来检测端口是否有变化
+    detectComTimer->setInterval(500);
+    detectComTimer->setSingleShot(false);
+    detectComTimer->start();
+
     init_ok_flag = true;
     qDebug() << "Init OK";
 }
@@ -137,6 +143,38 @@ MainWindow::~MainWindow()
     db.close();
     delete ui;
     delete serial;
+}
+
+void MainWindow::closePort()
+{
+    if (this->isSerialConnected)
+    {
+        this->isSerialConnected = false;
+        ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
+        ui->action_port->setToolTip(tr("打开连接"));
+
+        ui->groupBox->setEnabled(true);
+
+        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
+        ui->action_Log->setToolTip(tr("启动日志") );
+        connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
+        connLabel->setText(" Disconnected");
+        logfile_path.clear();
+
+        //停止重发
+        if (isRetransing)
+        {
+            retransTimer->stop();
+            ui->pushButton_retrans->setText(tr("重复发送") );
+
+            isRetransing = false;
+        }
+
+        //Close File
+        logFile->close();
+        serial->close();
+        isLoging = false;
+    }
 }
 
 void MainWindow::closeEvent(QCloseEvent *event)
@@ -278,6 +316,7 @@ void MainWindow::initSignalSlot()
 {
     connect(serial, &QSerialPort::readyRead, this, &MainWindow::readData);
     connect(retransTimer, SIGNAL(timeout()), this, SLOT(on_retrans()) );
+    connect(detectComTimer, SIGNAL(timeout()), this, SLOT(on_detect_com()) );
 }
 
 void MainWindow::fillPortsInfo()
@@ -381,7 +420,9 @@ void MainWindow::on_action_port_triggered()
     {
         QString port("");
         if (ui->comboBox_port->currentIndex() >= 0)
+        {
             port = portList.at(ui->comboBox_port->currentIndex());
+        }
         else
         {
             QMessageBox::critical(this, tr("Error"), "Port can't be NULL");
@@ -419,24 +460,10 @@ void MainWindow::on_action_port_triggered()
             ui->groupBox->setEnabled(false);
             connLabel->setStyleSheet(GREEN_TEXT_STYLESHEET);
             connLabel->setText(" Connected");
+
+            currentPort = port;
         } else {
-            this->isSerialConnected = false;
-            ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
-            ui->action_port->setToolTip(tr("打开连接"));
-
-            ui->groupBox->setEnabled(true);
-            isRetransing = false;
-            retransTimer->stop();
-
-            ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-            ui->action_Log->setToolTip(tr("启动日志") );
-            connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
-            connLabel->setText(" Disconnected");
-            logfile_path.clear();
-            //Close File
-            logFile->close();
-            serial->close();
-            isLoging = false;
+            closePort();
 
             //QMessageBox::critical(this, tr("Error"), serial->errorString());
             QMessageBox::critical(this, tr("Error"), tr("Open Fail"));
@@ -444,23 +471,7 @@ void MainWindow::on_action_port_triggered()
     }
     else
     {
-        this->isSerialConnected = false;
-        ui->action_port->setIcon(QIcon(":/image/icon/play.png"));
-        ui->action_port->setToolTip(tr("打开连接") );
-
-        ui->groupBox->setEnabled(true);
-        isRetransing = false;
-        retransTimer->stop();
-
-        ui->action_Log->setIcon(QIcon(":/image/icon/work_log_on.png"));
-        ui->action_Log->setToolTip(tr("启动日志") );
-        connLabel->setStyleSheet(RED_TEXT_STYLESHEET);
-        connLabel->setText(" Disconnected");
-        logfile_path.clear();
-        //Close File
-        logFile->close();
-
-        serial->close();
+        closePort();
     }
 }
 
@@ -1093,4 +1104,76 @@ void MainWindow::on_action_about_triggered()
        about = new About(this);
        about->show();
    }
+}
+
+//扫描端口
+void MainWindow::on_detect_com()
+{
+    QStringList portListTmp;
+    QStringList portDescListTmp; //端口全称List
+    const auto infos = QSerialPortInfo::availablePorts();
+    int i = 0;
+    bool is_equal = true;
+    bool is_equal_current = false;
+
+    //qDebug() << "on_detect_com coming";
+
+    for (const QSerialPortInfo &info : infos)
+    {
+        QString item = info.portName() + " ("+ info.description() + ")";
+        portListTmp.append(info.portName());
+        portDescListTmp.append(item);
+    }
+
+    //如果有变化则刷新显示
+    if (portListTmp.size() != portList.size())
+    {
+        is_equal = false;
+    }
+    else
+    {
+        for (i = 0; i < portListTmp.size(); i++)
+        {
+            if (portListTmp.at(i) != portList.at(i))
+            {
+                is_equal = false;
+                break;
+            }
+        }
+    }
+
+    if (false == is_equal)
+    {
+        ui->comboBox_port->clear();
+
+        portList = portListTmp;
+        ui->comboBox_port->addItems(portDescListTmp);
+    }
+
+    //如果当前打开的端口不在列表里,则关闭端口
+    if (currentPort.isEmpty() == false)
+    {
+        if (portList.size() != 0)
+        {
+            for (i = 0; i < portList.size(); i++)
+            {
+                if (currentPort == portList.at(i))
+                {
+                    is_equal_current = true;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            //关闭端口
+            closePort();
+        }
+
+        if (false == is_equal_current)
+        {
+            //关闭端口
+            closePort();
+        }
+    }
 }
