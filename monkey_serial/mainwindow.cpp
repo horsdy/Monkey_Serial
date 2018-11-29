@@ -8,6 +8,7 @@
 #include <QRect>
 #include <QDesktopWidget>
 #include <QWidget>
+#include <QSqlDatabase>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
